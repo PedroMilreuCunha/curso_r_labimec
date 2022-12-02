@@ -1,0 +1,50 @@
+\pgfdeclareimage[height=1.75cm, width=1.75cm]{logo_labimec}{header_LaTeX/logo_labimec.png}
+\pgfdeclareimage[height=1.45cm, width=1.75cm]{logo_ufpb}{header_LaTeX/logo_ufpb.png}
+\pgfdeclareimage[height=1.75cm, width=1.75cm]{logo_pessoal}{header_LaTeX/logo_pessoal.png}
+
+\setbeamertemplate{headline}{}
+\setbeamertemplate{page number in head/foot}[totalframenumber]
+\setbeamercolor{title in head/foot}{parent=subsection in head/foot}
+\usepackage[portuguese]{babel}
+\usepackage{csquotes}
+\usepackage{tikz}
+
+\titlegraphic{
+\pgfuseimage{logo_labimec}
+\hfill%
+\pgfuseimage{logo_ufpb}
+\hfill%
+\pgfuseimage{logo_pessoal}
+}
+
+\makeatletter
+\setbeamertemplate{title page}
+{
+ {\usebeamercolor[fg]{titlegraphic}\inserttitlegraphic\par}
+  \vbox{}
+  \vspace{1cm}%
+  \begingroup
+  \centering
+  \begin{beamercolorbox}[sep=8pt,center]{title}
+\usebeamerfont{title}\inserttitle\par%
+      \ifx\usebeamerfont{title}\insertsubtitle\@empty%
+      \else%
+        \vskip0.25em%
+        {\usebeamerfont{title}\insertsubtitle\par}%
+      \fi%     
+    \end{beamercolorbox}%
+  \vspace{0.75cm}% 
+  \par
+  \begin{beamercolorbox}[sep=8pt,center]{author}
+    \usebeamerfont{author}\insertauthor
+  \end{beamercolorbox}
+  \begin{beamercolorbox}[sep=8pt,center]{institute}
+    \usebeamerfont{author}\insertinstitute
+  \end{beamercolorbox}
+  \begin{beamercolorbox}[sep=8pt,center]{date}
+    \usebeamerfont{date}\insertdate
+  \end{beamercolorbox}\vskip0.5em
+  \endgroup
+  \vfill
+}
+\makeatother

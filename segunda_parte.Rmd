@@ -1,0 +1,60 @@
+---
+title: "Curso de programação em R - LABIMEC"
+subtitle: "(2º dia)"
+author: "Pedro Milreu Cunha"
+email: "pedro.milreu@academico.ufpb.br"
+institute: "Universidade Federal da Paraíba (UFPB) - PPGE/UFPB & LABIMEC"
+date: "06-12-2022"
+output:
+    beamer_presentation:
+        slide_level: 2
+        theme: "Szeged"
+        colortheme: "whale"
+        fonttheme: "structurebold"
+        number_sections: yes
+        toc: yes
+        includes:
+            in_header: logo.tex
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+# Revisão
+
+## Curso do prof. Pedro no dia 05/12/2022
+
+1.  Criação de mapas e utilização do pacote `stargazer`;
+
+2.  Criação de funções e temas gráficos customizados.
+
+# Criação de relatórios e slides utilizando R
+
+## RMarkdown
+
+## Relatórios
+
+## Slides
+
+# Possibilidades de uso do R a partir de situações reais
+
+## O quê mais o R é capaz de fazer?
+
+### Exemplos: análises estatísticas e econométricas
+
+#### Exemplo mais simples
+
+#### Exemplo mais complexo
+
+### Exemplos: criação de *dashboards*
+
+# Dúvidas?
+
+## Encerramento
+
+**Muito obrigado pela atenção e presença. Boa noite!**
+
+\vspace{1.75cm}
+
+*Um evento organizado pelo **Laboratório de Inteligência Artificial e Macroeconomia Computacional** ([LABIMEC](https://www.ufpb.br/labimec)) da UFPB.*

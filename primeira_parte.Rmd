@@ -1,0 +1,371 @@
+---
+title: "Curso de programação em R - LABIMEC"
+subtitle: "(2ª parte - 1º dia)"
+author: "Pedro Milreu Cunha"
+date: "05-12-2022"
+fontsize: 9pt
+output:
+  beamer_presentation:
+    slide_level: 3
+    theme: Szeged
+    colortheme: whale
+    fonttheme: structurebold
+    number_sections: yes
+    includes:
+      in_header: header_LaTeX/config.tex
+institute: "Universidade Federal da Paraíba (UFPB) - PPGE/UFPB & LABIMEC"
+email: "pedro.milreu@academico.ufpb.br"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# Bibliotecas ---- 
+library(dplyr) # Manipulação de dados
+library(readxl) # Importação de arquivos .xlsx
+
+library(sf) # Importação e manipulação de dados geográficos (.shp)
+library(tmap) # Criação de choropleth maps
+library(RColorBrewer) # Paleta de cores 
+
+# Comando especial ----
+`%notin%` <- Negate(`%in%`)
+
+# Função para renderizar figuras em .svg corretamente no LaTeX
+show_fig <- function(f) # Fonte: https://stackoverflow.com/a/56044642
+  {if (knitr::is_latex_output())
+  {
+    output = xfun::with_ext(f, 'pdf')
+    rsvg::rsvg_pdf(xfun::with_ext(f,'svg'), file = output)
+  } else {
+    output = xfun::with_ext(f, 'svg')
+  }
+  knitr::include_graphics(output)
+}
+```
+
+# Revisão
+
+### Curso do prof. Paulo no dia 29/11/2022
+
+1.  R, RStudio e instalação de pacotes;
+
+`install.packages(), library(), ...`
+
+2.  Importação de dados;
+
+`read.csv(), read.delim(), read.table(), ...`
+
+3.  Limpeza e manipulação de dados;
+
+`%>%, filter(), select(), mutate(), ...`
+
+4.  Análise de dados;
+
+`group_by(), summarise(), ggplot(), ...`
+
+# Configurações necessárias para essa aula
+
+\small
+
+```{r}
+# Bibliotecas ---- 
+library(dplyr) # Manipulação de dados
+library(readxl) # Importação de arquivos .xlsx
+
+library(sf) # Importação e manipulação de dados geográficos (.shp)
+library(tmap) # Criação de choropleth maps
+library(RColorBrewer) # Paleta de cores 
+
+# Comando especial ----
+`%notin%` <- Negate(`%in%`)
+
+# Função para renderizar figuras em .svg corretamente no LaTeX
+show_fig <- function(f) # Fonte: https://stackoverflow.com/a/56044642
+  {if (knitr::is_latex_output())
+  {
+    output = xfun::with_ext(f, 'pdf')
+    rsvg::rsvg_pdf(xfun::with_ext(f,'svg'), file = output)
+  } else {
+    output = xfun::with_ext(f, 'svg')
+  }
+  knitr::include_graphics(output)
+}
+```
+
+\normalsize
+
+# Criação de mapas
+
+### Elaboração de mapas utilizando R
+
+-   Os mapas são elaborados a partir de polígonos com coordenadas geográficas, permitindo uma visualização espacial dos dados;
+
+-   Em particular, têm-se os chamados *choropleth maps*, que utilizam escalas de cores para demonstrar a distribuição espacial de alguma variável de interesse.
+
+-   Há várias bibliotecas disponíveis para esse fim: [\textcolor{blue}{`spplot`}](https://rdrr.io/cran/sp/man/spplot.html), [\textcolor{blue}{`tmap`}](https://cran.r-project.org/web/packages/tmap/vignettes/tmap-getstarted.html) e [\textcolor{blue}{`ggplot2`}](https://ggplot2.tidyverse.org/) são algumas opções. **Faremos uso do pacote `tmap` nesse curso**.
+
+### Exemplo de mapa elaborado utilizando a biblioteca `tmap`
+
+```{r exemplo_mapa, fig.align = "center", echo = FALSE, fig.cap = "Exemplo de mapa criado pela biblioteca `tmap`.", out.height = "75%", out.width = "75%"}
+data("World")
+tm_shape(World) +
+tm_polygons("HPI") +
+tm_layout(legend.position = c("left", "center"))  
+```
+
+### O que é necessário para gerar um mapa utilizando R?
+
+1.  **Shapefiles**:
+
+as informações absolutamente *necessárias* para criação de mapas são aquelas referentes à geografia e polígonos, ou seja, os valores que mostram como os dados se distribuem espacialmente. São obtidos com os `shapefiles`\footnote{Esse não é o único formato possível de representação de dados geográficos.}, conjunto de arquivos com as extensões *`.cpg, .dbf, .prj, .shp, .shx`*;
+
+2.  Variáveis distribuídas de acordo com o nível geográfico utilizado para criação do mapa:
+
+dados referentes aos fenômenos cuja distribuição espacial queremos analisar, como, por exemplo: i) a população ou PIB per capita para cada UF brasileira; ii) o nível de abertura comercial para cada país do Mercosul, etc.
+
+### Onde obter os *shapefiles* para o Brasil?
+
+-   Os *shapefiles* para o Brasil são disponibilizados pelo *Instituto Brasileiro de Geografia e Estatística (IBGE)* em seu site: [\textcolor{blue}{IBGE}](https://www.ibge.gov.br/geociencias/organizacao-do-territorio/malhas-territoriais/15774-malhas.html?=&t=acesso-ao-produto);
+
+-   É possível obter as malhas territoriais de municípios, UFs, micro e mesorregiões, regiões geográficas imediatas e intermediárias e do país como um todo;
+
+-   Para que os arquivos sejam importados corretamente é necessário que todos os arquivos extraídos após download estejam em uma mesma pasta. No caso da malha territorial por estado, tem-se o arquivo comprimido `BR_UF_2021.zip` com os seguintes arquivos dentro: `BR_UF_2021.cpg, BR_UF_2021.dbf, BR_UF_2021.prj, BR_UF_2021.shp, BR_UF_2021.shx`.
+
+### Criando um mapa com o pacote `tmap`
+
+\vspace{-1.5cm}
+
+\underline{\textbf{\emph{Manipulação dos dados}}}
+
+1.  O primeiro passo é importar a geometria base do mapa. Para tanto, utilizamos o arquivo `BR_UF_2021.shp` e a função `st_read()` da biblioteca `sf`. Além disso, também criamos uma coluna com as siglas das UFs brasileira no arquivo importado.
+
+```{r passos_iniciais_mapa_1, results = "hide"}
+dados_geo <- st_read("data/shapefiles/BR_UF_2021.shp")
+dados_geo$Sigla_UF <- c("RO", "AC", "AM", "RR",
+                        "PA", "AP", "TO", "MA",
+                        "PI", "CE", "RN", "PB",
+                        "PE", "AL", "SE", "BA",
+                        "MG", "ES", "RJ", "SP",
+                        "PR", "SC", "RS", "MS",
+                        "MT", "GO", "DF")
+# Passo necessário para a posterior união dos dados
+```
+
+### Criando um mapa com o pacote `tmap`
+
+2.  Em seguida, lemos o arquivo com os dados cuja distribuição espacial queremos analisar e realizamos as transformações necessárias (nesse caso adicionar as siglas dos estados ausentes, dando o valor `NaN` para as observações em questão). Nesse exemplo vamos utilizar os dados referentes à subnotificação de estupros disponíveis no arquivo `data/sub_estimadas_estupros.xlsx`.
+
+```{r passos_iniciais_mapa_2}
+dados_sub <- read_excel("data/sub_estimadas_estupros.xlsx") %>%
+  select(Sigla_UF, sub_lag_end) %>%
+  group_by(Sigla_UF) %>%
+  mutate(sub_lag_end = mean(sub_lag_end, na.rm = TRUE)) %>%
+  unique()
+
+for (uf in dados_geo$Sigla_UF) { # Adicionar as siglas ausentes
+    if (uf %notin% dados_sub$Sigla_UF) {
+        dados_sub[nrow(dados_sub) + 1, ] <- list(uf, NaN)
+    }
+}
+```
+
+### Criando um mapa com o pacote `tmap`
+
+3.  Para finalizar a manipulação dos dados, unimos as duas bases com o comando `left_join`.
+
+\scriptsize
+
+```{r passos_iniciais_mapa_3}
+dados <- dados_geo %>%
+         left_join(dados_sub, by = "Sigla_UF")
+str(dados)
+```
+
+\normalsize
+
+### Criando um mapa com o pacote `tmap`
+
+\underline{\textbf{\emph{Visualização dos resultados}}}
+
+-   Utilizamos três comandos básicos para criar um *choropleth map*: `tm_shape(), tm_borders()` e `tm_fill()`. O primeiro deles cria a base geográfica do mapa, o segundo gera as bordas entre os entes representados e o terceiro preenche o mapa de acordo com o a distribuição de valores de alguma variável. Para mais informações sobre cada um deles consulte `?tm_shape, ?tm_borders, ?tm_fill`.
+
+```{r mapa_inicial}
+mapa_inicial <- tm_shape(dados) + 
+                tm_borders() + 
+                tm_fill("sub_lag_end")
+```
+
+O resultado obtido com os parâmetros padrões das funções pode ser visto no próximo slide.
+
+-   Para além dos funções já apresentadas e seus parâmetros, destacam-se `?tm_credits, ?tm_logo, ?tm_text, ?tm_layout`, com as três primeiras servindo para adicionar créditos (ou fonte), logos e textos ao mapa e a última servindo para customizar o \enquote{layout da imagem}.\footnote{Por \enquote{layout da imagem} entenda-se desde a posição da legenda ou título até o tamanho e família das fontes utilizadas.}
+
+### Criando um mapa com o pacote `tmap`
+
+```{r vis_mapa_inicial, fig.align = "center", out.height = "80%", out.width = "80%", echo = FALSE, fig.cap = "Mapa inicial."}
+mapa_inicial 
+```
+
+### Customizando um mapa com o pacote `tmap`
+
+-   Visando melhorar o mapa inicial que geramos anteriormente, iremos:
+
+1.  Afinar as bordas entre os polígonos: \scriptsize
+
+```{r passo_1, eval = FALSE}
+tm_borders(lwd = 0.55)
+```
+
+\normalsize
+
+2.  Remover o título da legenda, mudar a paleta de cores e associar uma cor e rótulo específicos para os valores ausentes: \scriptsize
+
+```{r passo_2, eval = FALSE}
+tm_fill("sub_lag_end", title = "", textNA = "Dado ausente",
+        colorNA = "lightgrey", palette = "GnBu",
+        labels = c("< 10%", "10% - 20%",
+                   "20% - 30%", "30% - 40%",
+                   "40% - 50%", "50% - 60%",
+                   "60% - 70%"))
+```
+
+\normalsize
+
+### Customizando um mapa com o pacote `tmap`
+
+3.  Identificar cada UF no mapa com a sua respectiva sigla: \scriptsize
+
+```{r passo_3, eval = FALSE}
+tm_text("Sigla_UF", size = 0.65, fontfamily = "serif",
+        fontface = "bold", col = "black")
+```
+
+\normalsize
+
+4.  Adicionar uma nota e a fonte dos dados ao mapa: \scriptsize
+
+```{r passo_4, eval = FALSE}
+tm_credits("Nota: Média do período jan/2012 - dez/2020.",
+           fontface = "italic", size = 0.7,
+           align = "right")
+```
+
+\normalsize
+
+5.  Adicionar um título principal ao gráfico, remover o "quadro" envolta do mapa e formatar a fonte da legenda e título: \scriptsize
+
+```{r passo_5, eval = FALSE}
+tm_layout(main.title = paste("Distribuição espacial da
+subnotificação", "de estupros de mulheres no Brasil",
+          sep = "\n"),
+          title.size = 1, main.title.position = "center",
+          fontfamily = "serif", main.title.fontface = "italic",
+          scale = 1, frame = FALSE,
+          legend.title.size = 1.5, legend.text.size = 0.8,
+          legend.outside.position = c("left", "bottom"))
+```
+
+\normalsize
+
+### Customizando um mapa com o pacote `tmap`
+
+-   Juntando todos os passos e salvando o mapa ao fim do processo com a função `tmap_save()`, temos:
+
+\tiny
+
+```{r codigo_final_mapa}
+mapa <- tm_shape(dados) + 
+            tm_borders(lwd = 0.55) +
+            tm_fill("sub_lag_end",
+                    title = "",
+                    textNA = "Dado ausente",
+                    colorNA = "lightgrey", palette = "GnBu",
+                    labels = c("< 10%", "10% - 20%",
+                               "20% - 30%", "30% - 40%",
+                               "40% - 50%", "50% - 60%",
+                               "60% - 70%")) + 
+            tm_text("Sigla_UF", size = 0.65, fontfamily = "serif",
+                    fontface = "bold", col = "black") +
+            tm_credits("Nota: Média do período jan/2012 - dez/2020.",
+                       fontface = "italic", size = 0.7,
+                       align = "right") +
+            tm_credits("Fonte: Elaboração própria a partir dos dados das SSPs.",
+                       size = 0.8, align = "right") + 
+            tm_layout(main.title = paste("Distribuição espacial da subnotificação",
+                                         "de estupros de mulheres no Brasil",
+                                         sep = "\n"),
+                      title.size = 1,
+                      main.title.position = "center", fontfamily = "serif",
+                      main.title.fontface = "italic", scale = 1, frame = FALSE,
+                      legend.title.size = 1.5, legend.text.size = 0.8,
+                      legend.outside.position = c("left", "bottom"))
+
+#tmap_save(mapa, "figures/mapa_sub_estupros.svg",
+#          width = 12, height = 12, units = "cm")
+
+```
+
+\normalsize
+
+### Resultado
+
+```{r comparacao_mapas_2, fig.align = "center", out.height = "70%", out.width = "80%", echo = FALSE, fig.cap = "Mapa customizado."}
+show_fig("figures/mapa_sub_estupros.svg")
+```
+
+# Pacote `stargazer`
+
+### Introdução
+
+### Exemplos
+
+#### Exemplos em `ASCII` (.txt)
+
+#### [cont.] Exemplos em `ASCII` (.txt)
+
+#### [cont.] Exemplos em `ASCII` (.txt)
+
+#### Exemplos em \LaTeX (.pdf)
+
+#### [cont.] Exemplos em \LaTeX (.pdf)
+
+#### [cont.] Exemplos em \LaTeX (.pdf)
+
+### Funcionalidades avançadas e boas práticas
+
+### Alternativas ao `stargazer`
+
+# Funções
+
+### O que são funções na linguagem R?
+
+### Como criar funções?
+
+### Exemplos básicos
+
+### Exemplos aplicados
+
+# Temas gráficos customizados
+
+### O que é um tema gráfico?
+
+### Temas básicos disponíveis no `ggplot2`
+
+### Criação de temas customizados: parâmetros importantes
+
+### Comparativos
+
+### Boas práticas
+
+# Dúvidas?
+
+### Encerramento
+
+**Muito obrigado pela atenção e presença. Boa noite!**
+
+\centering 
+\includegraphics[width = 4cm, height = 4cm]{figures/adeus_wally.png}
+
+\vfill 
+
+*Um evento organizado pelo **Laboratório de Inteligência Artificial e Macroeconomia Computacional** ([LABIMEC](https://www.ufpb.br/labimec)) da UFPB.*
