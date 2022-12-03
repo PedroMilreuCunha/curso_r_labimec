@@ -3,7 +3,7 @@ title: "Curso de programação em R - LABIMEC"
 subtitle: "(2ª parte - 1º dia)"
 author: "Pedro Milreu Cunha"
 date: "05-12-2022"
-fontsize: 9pt
+fontsize: 8pt
 output:
   beamer_presentation:
     slide_level: 3
@@ -18,7 +18,7 @@ email: "pedro.milreu@academico.ufpb.br"
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
 
 # Bibliotecas ---- 
 library(dplyr) # Manipulação de dados
@@ -27,6 +27,9 @@ library(readxl) # Importação de arquivos .xlsx
 library(sf) # Importação e manipulação de dados geográficos (.shp)
 library(tmap) # Criação de choropleth maps
 library(RColorBrewer) # Paleta de cores 
+
+library(plm) # Dados em painel
+library(stargazer) # Tabelas bem formatadas
 
 # Comando especial ----
 `%notin%` <- Negate(`%in%`)
@@ -76,6 +79,9 @@ library(readxl) # Importação de arquivos .xlsx
 library(sf) # Importação e manipulação de dados geográficos (.shp)
 library(tmap) # Criação de choropleth maps
 library(RColorBrewer) # Paleta de cores 
+
+library(plm) # Dados em painel
+library(stargazer) # Tabelas bem formatadas
 
 # Comando especial ----
 `%notin%` <- Negate(`%in%`)
@@ -138,8 +144,9 @@ dados referentes aos fenômenos cuja distribuição espacial queremos analisar, 
 
 \underline{\textbf{\emph{Manipulação dos dados}}}
 
-1.  O primeiro passo é importar a geometria base do mapa. Para tanto, utilizamos o arquivo `BR_UF_2021.shp` e a função `st_read()` da biblioteca `sf`. Além disso, também criamos uma coluna com as siglas das UFs brasileira no arquivo importado.
+1.  O primeiro passo é importar a geometria base do mapa. Para tanto, utilizamos o arquivo `BR_UF_2021.shp` e a função `st_read()` da biblioteca `sf`. Além disso, também criamos uma coluna com as siglas das UFs brasileiras no arquivo importado.
 
+\vspace{0.15cm}
 ```{r passos_iniciais_mapa_1, results = "hide"}
 dados_geo <- st_read("data/shapefiles/BR_UF_2021.shp")
 dados_geo$Sigla_UF <- c("RO", "AC", "AM", "RR",
@@ -156,6 +163,7 @@ dados_geo$Sigla_UF <- c("RO", "AC", "AM", "RR",
 
 2.  Em seguida, lemos o arquivo com os dados cuja distribuição espacial queremos analisar e realizamos as transformações necessárias (nesse caso adicionar as siglas dos estados ausentes, dando o valor `NaN` para as observações em questão). Nesse exemplo vamos utilizar os dados referentes à subnotificação de estupros disponíveis no arquivo `data/sub_estimadas_estupros.xlsx`.
 
+\vspace{0.15cm}
 ```{r passos_iniciais_mapa_2}
 dados_sub <- read_excel("data/sub_estimadas_estupros.xlsx") %>%
   select(Sigla_UF, sub_lag_end) %>%
@@ -174,6 +182,8 @@ for (uf in dados_geo$Sigla_UF) { # Adicionar as siglas ausentes
 
 3.  Para finalizar a manipulação dos dados, unimos as duas bases com o comando `left_join`.
 
+\vspace{0.15cm}
+
 \scriptsize
 
 ```{r passos_iniciais_mapa_3}
@@ -189,6 +199,8 @@ str(dados)
 \underline{\textbf{\emph{Visualização dos resultados}}}
 
 -   Utilizamos três comandos básicos para criar um *choropleth map*: `tm_shape(), tm_borders()` e `tm_fill()`. O primeiro deles cria a base geográfica do mapa, o segundo gera as bordas entre os entes representados e o terceiro preenche o mapa de acordo com o a distribuição de valores de alguma variável. Para mais informações sobre cada um deles consulte `?tm_shape, ?tm_borders, ?tm_fill`.
+
+\vspace{0.15cm}
 
 ```{r mapa_inicial}
 mapa_inicial <- tm_shape(dados) + 
@@ -208,17 +220,24 @@ mapa_inicial
 
 ### Customizando um mapa com o pacote `tmap`
 
--   Visando melhorar o mapa inicial que geramos anteriormente, iremos:
+Visando melhorar o mapa inicial que geramos anteriormente, iremos:
 
-1.  Afinar as bordas entre os polígonos: \scriptsize
+1. Afinar as bordas entre os polígonos:
+
+\vspace{0.15cm}
+
+\scriptsize
 
 ```{r passo_1, eval = FALSE}
 tm_borders(lwd = 0.55)
 ```
+\normalsize 
 
-\normalsize
+2. Remover o título da legenda e definir seus valores, mudar a paleta de cores e associar uma cor e rótulo específicos para os valores ausentes:
 
-2.  Remover o título da legenda, mudar a paleta de cores e associar uma cor e rótulo específicos para os valores ausentes: \scriptsize
+\vspace{0.15cm}
+
+\scriptsize
 
 ```{r passo_2, eval = FALSE}
 tm_fill("sub_lag_end", title = "", textNA = "Dado ausente",
@@ -228,31 +247,40 @@ tm_fill("sub_lag_end", title = "", textNA = "Dado ausente",
                    "40% - 50%", "50% - 60%",
                    "60% - 70%"))
 ```
-
 \normalsize
 
 ### Customizando um mapa com o pacote `tmap`
 
-3.  Identificar cada UF no mapa com a sua respectiva sigla: \scriptsize
+3. Identificar cada UF no mapa com a sua respectiva sigla:
+   
+\vspace{0.15cm}
+ 
+\scriptsize
 
 ```{r passo_3, eval = FALSE}
 tm_text("Sigla_UF", size = 0.65, fontfamily = "serif",
         fontface = "bold", col = "black")
 ```
-
 \normalsize
 
-4.  Adicionar uma nota e a fonte dos dados ao mapa: \scriptsize
+4.  Adicionar uma nota e a fonte dos dados ao mapa:
+
+\vspace{0.15cm}
+    
+\scriptsize
 
 ```{r passo_4, eval = FALSE}
 tm_credits("Nota: Média do período jan/2012 - dez/2020.",
            fontface = "italic", size = 0.7,
            align = "right")
 ```
+\normalsize 
 
-\normalsize
+5.  Adicionar um título principal ao gráfico, remover o "quadro" envolta do mapa e formatar a fonte da legenda e título:
 
-5.  Adicionar um título principal ao gráfico, remover o "quadro" envolta do mapa e formatar a fonte da legenda e título: \scriptsize
+\vspace{0.15cm}
+    
+\scriptsize
 
 ```{r passo_5, eval = FALSE}
 tm_layout(main.title = paste("Distribuição espacial da
@@ -264,12 +292,13 @@ subnotificação", "de estupros de mulheres no Brasil",
           legend.title.size = 1.5, legend.text.size = 0.8,
           legend.outside.position = c("left", "bottom"))
 ```
-
-\normalsize
+\normalsize 
 
 ### Customizando um mapa com o pacote `tmap`
 
 -   Juntando todos os passos e salvando o mapa ao fim do processo com a função `tmap_save()`, temos:
+
+\vspace{0.15cm}
 
 \tiny
 
@@ -317,23 +346,243 @@ show_fig("figures/mapa_sub_estupros.svg")
 
 ### Introdução
 
++ O `stargazer` é um famoso pacote da linguagem R que é utilizado para gerar tabelas bem formatadas contendo resultados de regressões, `data.frame`s ou estatísticas descritivas; 
+
++ Funciona com regressões estimadas por diversos pacotes, como, por exemplo, modelos lineares (`?lm`), modelos lineares generalizados (`?glm`) e modelos para dados em painel (`?plm`);
+
++ A biblioteca gera tabelas em três formatos: `ASCII` (.txt), `HTML` (.html) e \LaTeX (.pdf); iremos focar apenas em `ASCII` e \LaTeX \hspace{0.01cm} nesse curso.
+
+### Utilização
+
++ Toda a funcionalidade do pacote se dá através da função `stargazer`, cujo funcionamento pode ser consultado em `?stargazer::stargazer`. Tem-se abaixo os parâmetros que a função aceita, bem como os valores padrões de cada um.
+
+\vspace{0.15cm}
+
+\scriptsize
+```{r, eval = FALSE}
+function (..., type = "latex", title = "", style = "default", 
+    summary = NULL, out = NULL, out.header = FALSE, column.labels = NULL, 
+    column.separate = NULL, covariate.labels = NULL, dep.var.caption = NULL, 
+    dep.var.labels = NULL, dep.var.labels.include = TRUE, align = FALSE, 
+    coef = NULL, se = NULL, t = NULL, p = NULL, t.auto = TRUE, 
+    p.auto = TRUE, ci = FALSE, ci.custom = NULL, ci.level = 0.95, 
+    ci.separator = NULL, add.lines = NULL, apply.coef = NULL, 
+    apply.se = NULL, apply.t = NULL, apply.p = NULL, apply.ci = NULL, 
+    colnames = NULL, column.sep.width = "5pt", decimal.mark = NULL, 
+    df = TRUE, digit.separate = NULL, digit.separator = NULL, 
+    digits = NULL, digits.extra = NULL, flip = FALSE, float = TRUE, 
+    float.env = "table", font.size = NULL, header = TRUE, initial.zero = NULL, 
+    intercept.bottom = TRUE, intercept.top = FALSE, keep = NULL, 
+    keep.stat = NULL, label = "", model.names = NULL, model.numbers = NULL, 
+    multicolumn = TRUE, no.space = NULL, notes = NULL, notes.align = NULL, 
+    notes.append = TRUE, notes.label = NULL, object.names = FALSE, 
+    omit = NULL, omit.labels = NULL, omit.stat = NULL, omit.summary.stat = NULL, 
+    omit.table.layout = NULL, omit.yes.no = c("Yes", "No"), order = NULL, 
+    ord.intercepts = FALSE, perl = FALSE, report = NULL, rownames = NULL, 
+    rq.se = "nid", selection.equation = FALSE, single.row = FALSE, 
+    star.char = NULL, star.cutoffs = NULL, suppress.errors = FALSE, 
+    table.layout = NULL, table.placement = "!htbp", zero.component = FALSE, 
+    summary.logical = TRUE, summary.stat = NULL, nobs = TRUE, 
+    mean.sd = TRUE, min.max = TRUE, median = FALSE, iqr = FALSE) 
+```
+\normalsize
 ### Exemplos
 
-#### Exemplos em `ASCII` (.txt)
++ Vamos analisar dois usos mais comuns do pacote `stargazer`: 
 
-#### [cont.] Exemplos em `ASCII` (.txt)
+    1. Visualização dos resultados de análises descritivas; 
+    
+    2. Visualização dos resultados de estimações de modelos econométricos:
+    
+        2.1 Caso mais simples com apenas um modelo e sem customização da tabela;
+        
+        2.2 Caso mais complexo com vários modelos e customização da tabela;
+        
++ Para isso iremos importar o conjunto de dados `data/analise_enade.Rdata` que contém informações sobre o rendimento de discentes universitários no ENADE:
 
-#### [cont.] Exemplos em `ASCII` (.txt)
+\vspace{0.15cm}
 
-#### Exemplos em \LaTeX (.pdf)
+```{r dados_stargazer}
+load("data/analise_enade.Rdata")
+```
 
-#### [cont.] Exemplos em \LaTeX (.pdf)
+### Exemplos em `ASCII` (.txt)
 
-#### [cont.] Exemplos em \LaTeX (.pdf)
++ Vamos agora criar uma tabela em `ASCII`\footnote{Esse formato é útil para sessões interativas no R ou estágios iniciais de estimações, momentos nos quais queremos uma visualização rápida e bem formatada das informações presentes nos dados.} contendo as estatísticas descritivas do `data.frame` _dados_enade_ que importamos anteriormente. O código necessário para isso, bem como o resultado obtido podem ser vistos a seguir:
 
-### Funcionalidades avançadas e boas práticas
+\vspace{0.15cm}
+
+\scriptsize 
+```{r desc_ascii}
+stargazer(dados_enade, type = "text")
+```
+\normalsize 
+
+### Exemplos em `ASCII` (.txt)
+
++ Agora um exemplo clássico de formatação de tabelas simples de regressão:
+
+\vspace{0.15cm}
+
+\tiny 
+```{r ex_simples_ascii, echo = TRUE}
+stargazer(didreg, type = "text", single.row = TRUE)
+```
+\normalsize 
+
+### Exemplos em `ASCII` (.txt)
+
++ Por fim, temos agora o exemplo mais complexo. Utilizaremos o seguinte código:
+
+\vspace{0.15cm}
+
+\tiny 
+```{r ex_complexo_ascii_cod, eval = FALSE}
+stargazer(didreg_fe, didreg_fe_logit, didreg_fe_entropia,
+          type = "text", single.row = TRUE,
+          title = "Efeito médio de tratamento sobre os tratados - Ciclo 2009-2012",
+          decimal.mark = ",", digits = 5,
+          column.labels = c("Diff-diff + FE",
+                            "Diff-diff + FE + PSM (logit)",
+                            "Diff-diff + FE + PSM (entropia)"),
+          covariate.labels = c("Tempo", "Idade média", "Idade média²", 
+                               "Prop. brancos", "Prop. casados", "Prop. homens",
+                               "Prop. ensino medio ou mais", "Prop. renda per capita 3S.M.",
+                               "Tempo x Tratamento"),
+          model.numbers = FALSE,
+          initial.zero = TRUE,
+          dep.var.labels = "ln(Nota média)", dep.var.caption = "Variável dependente",
+          multicolumn = TRUE, model.names = FALSE, header = FALSE)
+```
+\normalsize 
+
+O resultado pode ser visto no próximo slide.
+
+### Exemplo em `ASCII` (.txt)
+
+\scriptsize 
+```{r ex_complexo_ascii, echo = FALSE}
+stargazer(didreg_fe, didreg_fe_logit, didreg_fe_entropia,
+          type = "text", single.row = TRUE,
+          title = "Efeito médio de tratamento sobre os tratados - Ciclo 2009-2012",
+          decimal.mark = ",", digits = 5,
+          column.labels = c("Diff-diff + FE",
+                            "Diff-diff + FE + PSM (logit)",
+                            "Diff-diff + FE + PSM (entropia)"),
+          covariate.labels = c("Tempo", "Idade média", "Idade média²", 
+                               "Prop. brancos", "Prop. casados", "Prop. homens",
+                               "Prop. ensino medio ou mais", "Prop. renda per capita 3S.M.",
+                               "Tempo x Tratamento"),
+          model.numbers = FALSE,
+          initial.zero = TRUE,
+          dep.var.labels = "ln(Nota média)", dep.var.caption = "Variável dependente",
+          multicolumn = TRUE, model.names = FALSE)
+```
+\normalsize 
+
+### Exemplos em \LaTeX (.pdf)
+
++ Vamos agora recriar o exemplo das estatísticas descritivas, porém utilizando o formato \LaTeX.
+
+\vspace{0.15cm}
+
+\scriptsize
+```{r desc_latex, results = "asis"}
+stargazer(dados_enade, type = "latex", header = FALSE)
+```
+\normalsize 
+
+
+### Exemplos em \LaTeX (.pdf)
+
++ Em seguida, reproduzimos o exemplo de uma regressão simples:
+
+\vspace{0.15cm}
+
+\tiny 
+```{r ex_simples_latex, results = "asis"}
+stargazer(didreg, type = "latex", header = FALSE, single.row = TRUE)
+```
+\normalsize 
+
+### Exemplos em \LaTeX (.pdf)
+
++ Por fim, com o código abaixo geramos uma tabela complexa, com diversos modelos e bem formatada. 
+
+\vspace{0.15cm}
+
+\tiny 
+```{r ex_complexo_latex_cod, eval = FALSE}
+stargazer(didreg_fe, didreg_fe_logit, didreg_fe_entropia,
+          type = "latex",
+          title = "Efeito médio de tratamento sobre os tratados - Ciclo 2009-2012",
+          decimal.mark = ",", digits = 5,
+          column.labels = c("Diff-diff + FE",
+                            "Diff-diff + FE + PSM (logit)",
+                            "Diff-diff + FE + PSM (entropia)"),
+          covariate.labels = c("Tempo", "Idade média", "Idade média²", 
+                               "Prop. brancos", "Prop. casados", "Prop. homens",
+                               "Prop. ensino medio ou mais", "Prop. renda per capita 3S.M.",
+                               "Tempo x Tratamento"),
+          model.numbers = FALSE,
+          initial.zero = TRUE,
+          dep.var.labels = "ln(Nota média)", dep.var.caption = "Variável dependente",
+          multicolumn = TRUE, model.names = FALSE, align = TRUE, header = FALSE,
+          table.placement = "H", no.space = TRUE)
+```
+\normalsize 
+
++ É importante destacar que alguns itens específicos não podem ser customizados diretamente através do `stargazer`, como, por exemplo, os rótulos _Observations_ e _Adjusted R2_, que não conseguimos traduzir para o português. Apesar disso, uma vez que a função `stargazer::stargazer()` retorna o código em LaTeX necessário para criar a(s) tabela(s) escolhida(s) não é difícil customizar o resultado final.
+
+### Exemplos em \LaTeX (.pdf)
+
+\tiny 
+```{r ex_complexo_latex, results = "asis", echo = FALSE}
+stargazer(didreg_fe, didreg_fe_logit, didreg_fe_entropia,
+          type = "latex",
+          title = "Efeito médio de tratamento sobre os tratados - Ciclo 2009-2012",
+          decimal.mark = ",", digits = 5,
+          column.labels = c("Diff-diff + FE",
+                            "Diff-diff + FE + PSM (logit)",
+                            "Diff-diff + FE + PSM (entropia)"),
+          covariate.labels = c("Tempo", "Idade média", "Idade média²", 
+                               "Prop. brancos", "Prop. casados", "Prop. homens",
+                               "Prop. ensino medio ou mais", "Prop. renda per capita 3S.M.",
+                               "Tempo x Tratamento"),
+          model.numbers = FALSE,
+          initial.zero = TRUE,
+          dep.var.labels = "ln(Nota média)", dep.var.caption = "Variável dependente",
+          multicolumn = TRUE, model.names = FALSE, align = TRUE, header = FALSE,
+          table.placement = "H", no.space = TRUE)
+```
+\normalsize 
+
+### Funcionalidades avançadas
+
++ Dentre as funcionalidades mais avançadas do `stargazer` não utilizadas aqui, destacam-se:
+
+    1. Utilização de coeficientes, erros-padrões, estatísticas-t e p-valores customizados com os parâmetros `coef, se, t, p`, respectivamente;
+    
+    2. Substituição dos erros-padrões por intervalos de confiança (parâmetros `ci, ci.custom, ci.level, ci.separator`);
+    
+    3. Aplicação de funções nos coeficientes, erros-padrões, estatísticas-t, intervalos de confiança e p-valores (parâmetros `apply.coef, apply.se, apply.t, apply.ci, apply.p`);
+    
+    4. Exportar o resultado do comando diretamente para um arquivo `.txt` com o parâmetro `out`.
+    
 
 ### Alternativas ao `stargazer`
+
++ Embora ainda seja uma das **referências** no ecossistema do R no que diz respeito a exportação de resultados em tabelas formatadas, especialmente utilizando \LaTeX, o `stargazer` tem problemas e não é compatível com todos os tipos de modelos que podem ser gerados com os diversos pacotes existentes na linguagem;
+
++ Boas alternativas existem e é importante procurar qual melhor se adequa em cada ocasião. Algumas opções são:
+
+    1. [gtsummary](https://www.danieldsjoberg.com/gtsummary/);
+    
+    2. [flextable](https://ardata-fr.github.io/flextable-book/);
+    
+    3. [etable](https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=&cad=rja&uact=8&ved=2ahUKEwj-uNb1udz7AhUHuZUCHRw2Am0QFnoECAoQAQ&url=https%3A%2F%2Frdrr.io%2Fcran%2Ffixest%2Fman%2Fetable.html&usg=AOvVaw0Pr3vhB__WaLGrz_n8InK6) para modelos de efeitos fixos estimados com o pacote `fixest`;
+    
+    4. [xtable](https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=&ved=2ahUKEwi5x8SRutz7AhXQq5UCHcGEAh8QFnoECA0QAQ&url=https%3A%2F%2Fcran.r-project.org%2Fweb%2Fpackages%2Fxtable%2Fvignettes%2FxtableGallery.pdf&usg=AOvVaw1K8Ssoq5kRZwXjiJMGkrhK).
 
 # Funções
 
@@ -355,7 +604,7 @@ show_fig("figures/mapa_sub_estupros.svg")
 
 ### Comparativos
 
-### Boas práticas
+### Funcionalidade avançada
 
 # Dúvidas?
 

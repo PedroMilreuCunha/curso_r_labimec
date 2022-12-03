@@ -1,0 +1,26 @@
+\frametitle{Alternativas ao \texttt {stargazer}}
+\protect\hypertarget{alternativas-ao-stargazer}{}
+\begin{itemize}
+\item
+  Embora ainda seja uma das \textbf{referências} no ecossistema do R no
+  que diz respeito a exportação de resultados em tabelas formatadas,
+  especialmente utilizando \LaTeX, o \texttt{stargazer} tem problemas e
+  não é compatível com todos os tipos de modelos que podem ser gerados
+  com os diversos pacotes existentes na linguagem;
+\item
+  Boas alternativas existem e é importante procurar qual melhor se
+  adequa em cada ocasião. Algumas opções são:
+
+  \begin{enumerate}
+  \item
+    \href{https://www.danieldsjoberg.com/gtsummary/}{gtsummary};
+  \item
+    \href{https://ardata-fr.github.io/flextable-book/}{flextable};
+  \item
+    \href{https://www.google.com/url?sa=t\&rct=j\&q=\&esrc=s\&source=web\&cd=\&cad=rja\&uact=8\&ved=2ahUKEwj-uNb1udz7AhUHuZUCHRw2Am0QFnoECAoQAQ\&url=https\%3A\%2F\%2Frdrr.io\%2Fcran\%2Ffixest\%2Fman\%2Fetable.html\&usg=AOvVaw0Pr3vhB__WaLGrz_n8InK6}{etable}
+    para modelos de efeitos fixos estimados com o pacote
+    \texttt{fixest};
+  \item
+    \href{https://www.google.com/url?sa=t\&rct=j\&q=\&esrc=s\&source=web\&cd=\&ved=2ahUKEwi5x8SRutz7AhXQq5UCHcGEAh8QFnoECA0QAQ\&url=https\%3A\%2F\%2Fcran.r-project.org\%2Fweb\%2Fpackages\%2Fxtable\%2Fvignettes\%2FxtableGallery.pdf\&usg=AOvVaw1K8Ssoq5kRZwXjiJMGkrhK}{xtable}.
+  \end{enumerate}
+\end{itemize}
