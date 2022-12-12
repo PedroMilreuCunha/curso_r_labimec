@@ -1,0 +1,962 @@
+---
+title: "Exercícios - Intervalo de confiança"
+header-includes:
+- \usepackage{booktabs}
+- \usepackage{float}
+- \usepackage{bm}
+- \usepackage[labelformat = empty]{caption}
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(pander)
+```
+
+<style>
+table {
+  background-color: white !important;
+  color: blue !important;
+}
+</style>
+
+# **Construa os IC e interprete cada resultado**^[Pequenas divergências entre os resultados apresentados aqui e as respostas oficiais do livro se devem à aproximações feitas pelo autor.]
+
+## **Para a média populacional**
+
+<center><b>Tabela 1: Formulário - IC para a média populacional</b></center>
+
+```{r, echo = FALSE}
+tab_1 <- data.frame(`Variância` = c("Conhecida", "Conhecida", "Desconhecida", "Desconhecida"),
+                    `População` = c("Infinita", "Finita", "Infinita", "Finita"),
+                    `Fórmula` = c("$P\\left(\\bar{x} - Z_{\\alpha/2} \\cdot  \\frac{\\sigma}{\\sqrt{n}} \\leq \\mu \\leq \\bar{x} + Z_{\\alpha/2} \\cdot \\frac{\\sigma}{\\sqrt{n}}\\right) = 1-\\alpha$",
+                                "$P\\left(\\bar{x} - Z_{\\alpha/2} \\cdot  \\frac{\\sigma}{\\sqrt{n}} \\cdot \\sqrt{\\frac{N-n}{N-1}} \\leq \\mu \\leq \\bar{x} + Z_{\\alpha/2} \\cdot \\frac{\\sigma}{\\sqrt{n}} \\cdot \\sqrt{\\frac{N-n}{N-1}}\\right) = 1-\\alpha$",
+                                "$P\\left(\\bar{x} - t_{\\alpha/2;n-1} \\cdot  \\frac{\\sigma}{\\sqrt{n}} \\leq \\mu \\leq \\bar{x} + t_{\\alpha/2;n-1} \\cdot \\frac{\\sigma}{\\sqrt{n}}\\right) = 1-\\alpha$",
+                                "$P\\left(\\bar{x} - t_{\\alpha/2;n-1} \\cdot  \\frac{\\sigma}{\\sqrt{n}} \\cdot \\sqrt{\\frac{N-n}{N-1}} \\leq \\mu \\leq \\bar{x} + t_{\\alpha/2;n-1} \\cdot \\frac{\\sigma}{\\sqrt{n}} \\cdot \\sqrt{\\frac{N-n}{N-1}}\\right) = 1-\\alpha$"))
+knitr::kable(tab_1, escape = FALSE, align = rep("c",3))
+```
+
+### 1.
+
+Foram retiradas 25 peças da produção diária de uma máquina, encontrando-se para uma medida uma média de 5,2mm. Sabendo-se que as medidas têm distribuição normal com desvio-padrão populacional 1,2mm, construir intervalos de confiança para a média aos níveis de 90\%, 95\% e 99\%.
+
+**R.** Como a variância é conhecida e não foi dito nada sobre a população ser pequena, utilizaremos o primeiro caso da Tabela 1.
+
+**a.** 90\%.
+
+Primeiro calculamos o quantil referente ao nível de confiança pedido:
+
+```{r }
+alfa_1_a <- 0.1
+mu_1_a <- 5.2
+n_1_a <- 25
+sd_1_a <- 1.2
+z_1_a <- qnorm(alfa_1_a/2, lower.tail = FALSE)
+```
+
+Em seguida, construímos o IC:
+
+```{r, class.source="bg-warning", class.output="bg-success"}
+cat("IC(mu,", paste(100*(1-alfa_1_a), "%): ["), min(mu_1_a - z_1_a*sd_1_a/sqrt(n_1_a),
+                                                  mu_1_a + z_1_a*sd_1_a/sqrt(n_1_a)),
+    ";", max(mu_1_a - z_1_a*sd_1_a/sqrt(n_1_a),
+              mu_1_a + z_1_a*sd_1_a/sqrt(n_1_a)),
+    "]")
+```
+    
+A interpretação do intervalo é que se fossem feitas repetidas amostras e construídos diversos intervalos, em 90\% dos casos eles incluíriam o verdadeiro parâmetro populacional $\mu$ (ou seja, o intervalo contém a média populacional com 90\% de confiança).
+
+**b.** 95\%.
+
+Primeiro calculamos o quantil referente ao nível de confiança pedido:
+
+```{r }
+alfa_1_b <- 0.05
+mu_1_b <- 5.2
+n_1_b <- 25
+sd_1_b <- 1.2
+z_1_b <- qnorm(alfa_1_b/2, lower.tail = FALSE)
+```
+
+Em seguida, construímos o IC:
+
+```{r, class.source="bg-warning", class.output="bg-success"}
+cat("IC(mu,", paste(100*(1-alfa_1_b), "%): ["), min(mu_1_b - z_1_b*sd_1_b/sqrt(n_1_b),
+                                                  mu_1_b + z_1_b*sd_1_b/sqrt(n_1_b)),
+    ";", max(mu_1_b - z_1_b*sd_1_b/sqrt(n_1_b),
+              mu_1_b + z_1_b*sd_1_b/sqrt(n_1_b)),
+    "]")
+```
+    
+A interpretação do intervalo é que se fossem feitas repetidas amostras e construídos diversos intervalos, em 95\% dos casos eles incluíriam o verdadeiro parâmetro populacional $\mu$ (ou seja, o intervalo contém a média populacional com 95\% de confiança).
+
+**c.** 99\%.
+
+Primeiro calculamos o quantil referente ao nível de confiança pedido:
+
+```{r }
+alfa_1_c <- 0.01
+mu_1_c <- 5.2
+n_1_c <- 25
+sd_1_c <- 1.2
+z_1_c <- qnorm(alfa_1_c/2, lower.tail = FALSE)
+```
+
+Em seguida, construímos o IC:
+
+```{r, class.source="bg-warning", class.output="bg-success" }
+cat("IC(mu,", paste(100*(1-alfa_1_c), "%): ["), min(mu_1_c - z_1_c*sd_1_c/sqrt(n_1_c),
+                                                    mu_1_c + z_1_c*sd_1_c/sqrt(n_1_c)),
+    ";", max(mu_1_c - z_1_c*sd_1_c/sqrt(n_1_c),
+              mu_1_c + z_1_c*sd_1_c/sqrt(n_1_c)),
+    "]")
+```
+    
+A interpretação do intervalo é que se fossem feitas repetidas amostras e construídos diversos intervalos, em 99\% dos casos eles incluíriam o verdadeiro parâmetro populacional $\mu$ (ou seja, o intervalo contém a média populacional com 99\% de confiança).
+
+### 2.
+
+De uma distribuição normal com $\sigma^2=1,96$, obteve-e a seguinte amostra: $25,2;26,0;26,4;27,1;28,2;28,4$. Determinar o intervalo de confiança para a média da população, sendo $\alpha = 0,05$ e $\alpha = 0,10$.
+
+**R.** Vamos determinar a média amostral e imputar as informações iniciais do enunciado:
+```{r,}
+amostra_2 <- c(25.2,26,26.4,27.1,28.2,28.4)
+mu_2 <- mean(amostra_2)
+sd_2 <- sqrt(1.96)
+n_2 <- length(amostra_2)
+```
+
+Agora basta repetir o processo do exercício anterior:
+
+**a.** $\alpha = 0,05$.
+
+**R.**
+
+```{r,}
+alfa_2_a <- 0.05
+z_2_a <- qnorm(alfa_2_a/2, lower.tail = FALSE)
+```
+
+```{r, class.source="bg-warning", class.output="bg-success"}
+cat("IC(mu,", paste(100*(1-alfa_2_a), "%): ["), min(mu_2 - z_2_a*sd_2/sqrt(n_2),
+                                                    mu_2 + z_2_a*sd_2/sqrt(n_2)),
+    ";", max(mu_2 - z_2_a*sd_2/sqrt(n_2),
+              mu_2 + z_2_a*sd_2/sqrt(n_2)),
+    "]")
+```
+
+A interpretação do intervalo é que se fossem feitas repetidas amostras e construídos diversos intervalos, em 95\% dos casos eles incluíriam o verdadeiro parâmetro populacional $\mu$ (ou seja, o intervalo contém a média populacional com 95\% de confiança).
+
+**b.** $\alpha = 0,10$.
+
+**R.**
+
+```{r,}
+alfa_2_b <- 0.1
+z_2_b <- qnorm(alfa_2_b/2, lower.tail = FALSE)
+```
+
+```{r, class.source="bg-warning", class.output="bg-success"}
+cat("IC(mu,", paste(100*(1-alfa_2_b), "%): ["), min(mu_2 - z_2_b*sd_2/sqrt(n_2),
+                                                    mu_2 + z_2_b*sd_2/sqrt(n_2)),
+    ";", max(mu_2 - z_2_b*sd_2/sqrt(n_2),
+              mu_2 + z_2_b*sd_2/sqrt(n_2)),
+    "]")
+```
+
+A interpretação do intervalo é que se fossem feitas repetidas amostras e construídos diversos intervalos, em 90\% dos casos eles incluíriam o verdadeiro parâmetro populacional $\mu$ (ou seja, o intervalo contém a média populacional com 90\% de confiança).
+
+### 3.
+
+Suponha que as alturas dos alunos de nossa faculdae tenham distribuição normal com $\sigma=15$ cm. Foi retirada uma amostra aleatória de 100 alunos obtendo-se $\bar{x}=175$ cm. Construir, ao nível de significância de 95\% o intervalo para a verdadeira altura média dos alunos.
+
+**R.** O processo é o mesmo.
+
+```{r,}
+mu_3 <- 175
+sd_3 <- 15
+n_3 <- 100
+```
+
+O intervalo será dado por:
+
+```{r,}
+alfa_3 <- 0.05
+z_3 <- qnorm(alfa_3/2, lower.tail = FALSE)
+```
+
+```{r, class.source="bg-warning", class.output="bg-success"}
+cat("IC(mu,", paste(100*(1-alfa_3), "%): ["), min(mu_3 - z_3*sd_3/sqrt(n_3),
+                                                    mu_3 + z_3*sd_3/sqrt(n_3)),
+    ";", max(mu_3 - z_3*sd_3/sqrt(n_3),
+              mu_3 + z_3*sd_3/sqrt(n_3)),
+    "]")
+```
+
+A interpretação do intervalo é que se fossem feitas repetidas amostras e construídos diversos intervalos, em 95\% dos casos eles incluíriam o verdadeiro parâmetro populacional $\mu$ (ou seja, o intervalo contém a média populacional com 95\% de confiança).
+
+### 4.
+
+Dados $n=10, \bar{X}=110$ e $S=10$, determinar os intervalos de confiança $\mu$ aos níveis de 90\% e 95\%.
+
+**R.** Veja que agora a variância é desconhecida. Assim, precisamos utilizar a distribuição t de Student com $n-1$ graus de liberdade. O restante não se altera.
+
+```{r,}
+mu_4 <- 110
+sd_4 <- 10
+n_4 <- 10
+```
+
+**a.** 90\%:
+
+```{r, }
+alfa_4_a <- 0.1
+t_4_a <- qt(alfa_4_a/2, n_4-1, lower.tail = FALSE)
+```
+
+```{r, class.source="bg-warning", class.output="bg-success"}
+cat("IC(mu,", paste(100*(1-alfa_4_a), "%): ["), min(mu_4 - t_4_a*sd_4/sqrt(n_4),
+                                                    mu_4 + t_4_a*sd_4/sqrt(n_4)),
+    ";", max(mu_4 - t_4_a*sd_4/sqrt(n_4),
+              mu_4 + t_4_a*sd_4/sqrt(n_4)),
+    "]")
+```
+
+A interpretação do intervalo é que se fossem feitas repetidas amostras e construídos diversos intervalos, em 90\% dos casos eles incluíriam o verdadeiro parâmetro populacional $\mu$ (ou seja, o intervalo contém a média populacional com 90\% de confiança).
+
+**b.** 95\%:
+
+```{r,}
+alfa_4_b <- 0.05
+t_4_b <- qt(alfa_4_b/2, n_4-1, lower.tail = FALSE)
+```
+
+```{r, class.source="bg-warning", class.output="bg-success"}
+cat("IC(mu,", paste(100*(1-alfa_4_b), "%): ["), min(mu_4 - t_4_b*sd_4/sqrt(n_4),
+                                                    mu_4 + t_4_b*sd_4/sqrt(n_4)),
+    ";", max(mu_4 - t_4_b*sd_4/sqrt(n_4),
+              mu_4 + t_4_b*sd_4/sqrt(n_4)),
+    "]")
+```
+
+A interpretação do intervalo é que se fossem feitas repetidas amostras e construídos diversos intervalos, em 95\% dos casos eles incluíriam o verdadeiro parâmetro populacional $\mu$ (ou seja, o intervalo contém a média populacional com 95\% de confiança).
+
+### 5.
+
+Uma amostra é composta pelos seguintes elementos:
+
+```{r , echo=FALSE, message=FALSE, warnings=FALSE, results='asis'}
+tab_5 <- " 
+| Valores                                   |
+|:-----------------------------------------:|
+| 7 7 8 9 9 9 10 11 11 11 12 13 13 14 15 15 |
+"
+cat(tab_5)
+```
+
+Construir os intervalos de confiança para a média sendo $1-\alpha=97,5\%$ e $1-\alpha=75\%$.
+
+**R.** Inicialmente vamos obter a média e desvio-padrão da amostra.
+
+```{r,}
+amostra_5 <- c(7,7,8,9,9,9,10,11,11,11,12,13,13,14,15,15)
+mu_5 <- mean(amostra_5)
+sd_5 <- sd(amostra_5)
+n_5 <- length(amostra_5)
+```
+
+Em seguida, o processo é o mesmo.
+
+**a.** $1-\alpha=97,5\%$
+
+```{r, }
+alfa_5_a <- 1-0.975
+t_5_a <- qt(alfa_5_a/2, n_5-1, lower.tail = FALSE)
+```
+
+```{r, class.source="bg-warning", class.output="bg-success"}
+cat("IC(mu,", paste(100*(1-alfa_5_a), "%): ["), min(mu_5 - t_5_a*sd_5/sqrt(n_5),
+                                                    mu_5 + t_5_a*sd_5/sqrt(n_5)),
+    ";", max(mu_5 - t_5_a*sd_5/sqrt(n_5),
+              mu_5 + t_5_a*sd_5/sqrt(n_5)),
+    "]")
+```
+
+A interpretação do intervalo é que se fossem feitas repetidas amostras e construídos diversos intervalos, em 97,5\% dos casos eles incluíriam o verdadeiro parâmetro populacional $\mu$ (ou seja, o intervalo contém a média populacional com 97,5\% de confiança).
+
+**b.** $1-\alpha=75\%$
+
+```{r,}
+alfa_5_b <- 1-0.75
+t_5_b <- qt(alfa_5_b/2, n_5-1, lower.tail = FALSE)
+```
+
+```{r, class.source="bg-warning", class.output="bg-success"}
+cat("IC(mu,", paste(100*(1-alfa_5_b), "%): ["), min(mu_5 - t_5_b*sd_5/sqrt(n_5),
+                                                    mu_5 + t_5_b*sd_5/sqrt(n_5)),
+    ";", max(mu_5 - t_5_b*sd_5/sqrt(n_5),
+              mu_5 + t_5_b*sd_5/sqrt(n_5)),
+    "]")
+```
+
+A interpretação do intervalo é que se fossem feitas repetidas amostras e construídos diversos intervalos, em 75\% dos casos eles incluíriam o verdadeiro parâmetro populacional $\mu$ (ou seja, o intervalo contém a média populacional com 75\% de confiança).
+
+### 6.
+
+Colhida uma amostra de 30 peças, forneceu os seguintes pesos:
+
+```{r , echo=FALSE, message=FALSE, warnings=FALSE, results='asis'}
+tab_6 <- " 
+| Valores                                 |
+|:---------------------------------------:|
+| 250 265 267 269 271 275 277 281 283 284 |
+| 287 289 291 293 293 298 301 303 306 307 |
+| 307 309 311 315 319 322 324 328 335 339 |
+"
+cat(tab_6)
+```
+
+Por meio da construção do intervalo de confiança, responder e esta amostra satisfaz a especificação pela qual o peso médio deve ser 300 kg.
+
+Sugestão: Adote $\alpha = 5\%$.
+
+**R.** Seguindo a sugestão do autor, vamos inicialmente obter o IC em questão:
+
+```{r,}
+amostra_6 <- c(250,265,267,269,271,275,277,281,283,284,
+               287,289,291,293,293,298,301,303,306,307,
+               307,309,311,315,319,322,324,328,335,339)
+mu_6 <- mean(amostra_6)
+sd_6 <- sd(amostra_6)
+n_6 <- length(amostra_6)
+alfa_6 <- 0.05
+t_6 <- qt(alfa_6/2, n_6-1, lower.tail = FALSE)
+```
+
+```{r, class.source="bg-warning", class.output="bg-success"}
+cat("IC(mu,", paste(100*(1-alfa_6), "%): ["), min(mu_6 - t_6*sd_6/sqrt(n_6),
+                                                    mu_6 + t_6*sd_6/sqrt(n_6)),
+    ";", max(mu_6 - t_6*sd_6/sqrt(n_6),
+              mu_6 + t_6*sd_6/sqrt(n_6)),
+    "]")
+```
+
+Veja que o valor 300 kg pertence ao intervalo que construímos, de modo que podemos concluir que a amostra satisfaz a especificação desejada.
+
+### 7.
+
+Em uma fábrica, colhida uma amostra de certa peça, obtiveram-se as seguintes medidas para os diâmetros:
+
+```{r , echo=FALSE, message=FALSE, warnings=FALSE, results='asis'}
+tab_6 <- " 
+| Valores                       |
+|:-----------------------------:|
+| 10 11 11 11 12 12 12 12 13 13 |
+| 13 13 13 13 13 13 13 13 13 13 |
+| 14 14 14 14 14 15 15 15 16 16 |
+"
+cat(tab_6)
+```
+
+**a)** Estimar a média e a variância.
+
+**R.**
+
+```{r, }
+amostra_7 <- c(10,11,11,11,12,12,12,12,13,13,
+               13,13,13,13,13,13,13,13,13,13,
+               14,14,14,14,14,15,15,15,16,16)
+mu_7 <- mean(amostra_7)
+var_7 <- var(amostra_7)
+```
+
+```{r, class.source="bg-warning", class.output="bg-success"}
+cat("Média amostral:", mu_7, "\n Variância amostral:", var_7)
+```
+
+**b)** Contruir um intervalo de confiança para a média sendo $\alpha = 5\%$.
+
+**R.**
+
+```{r,}
+sd_7 <- sd(amostra_7)
+n_7 <- length(amostra_7)
+alfa_7 <- 0.05
+t_7 <- qt(alfa_7/2, n_7-1, lower.tail = FALSE)
+```
+
+```{r, class.source="bg-warning", class.output="bg-success"}
+cat("IC(mu,", paste(100*(1-alfa_7), "%): ["), min(mu_7 - t_7*sd_7/sqrt(n_7),
+                                                    mu_7 + t_7*sd_7/sqrt(n_7)),
+    ";", max(mu_7 - t_7*sd_7/sqrt(n_7),
+              mu_7 + t_7*sd_7/sqrt(n_7)),
+    "]")
+```
+
+### 8.
+
+Em quatro leituras experimentais de um "comercial" de 30 segundos, um locutor levou em média $29,2$ segundos com uma $S^2=5,76$ segundos ao quadrado. Costruir os limites de confiança para a média. Dado $\alpha=10\%$.
+
+**R.** Novamente temos uma questão de resposta bem direta:
+
+```{r, }
+mu_8 <- 29.2
+sd_8 <- sqrt(5.76)
+n_8 <- 4
+alfa_8 <- 0.1
+t_8 <- qt(alfa_8/2, n_8-1, lower.tail = FALSE)
+```
+
+```{r, class.source="bg-warning", class.output="bg-success"}
+cat("IC(mu,", paste(100*(1-alfa_8), "%): ["), min(mu_8 - t_8*sd_8/sqrt(n_8),
+                                                    mu_8 + t_8*sd_8/sqrt(n_8)),
+    ";", max(mu_8 - t_8*sd_8/sqrt(n_8),
+              mu_8 + t_8*sd_8/sqrt(n_8)),
+    "]")
+```
+
+### 9.
+
+Construir intervalos de confiança para a média admitindo-se a seguintes distribuições amotrais, ao nível de 95\%.
+
+**a)** \begin{center} \begin{tabular}{l|c|c|c|c} \textbf{Classes} & 0--5 & 5--10 & 10--15 & 15--20 \\ \hline $F_i$ & 2 & 3 & 5 & 2 \\ \end{tabular} \end{center}
+
+**R.** Esse exercício requer mais atenção, devido aos intervalos de frequencia. Vamos incluir os dados da seguinte maneira:
+
+```{r,}
+classe_1_a_inf <- 0
+classe_1_a_sup <- 5
+f_1_a <- 2
+medio_classe_1_a <- mean(c(classe_1_a_inf, classe_1_a_sup))
+
+classe_2_a_inf <- 5
+classe_2_a_sup <- 10
+f_2_a <- 3
+medio_classe_2_a <- mean(c(classe_2_a_inf, classe_2_a_sup))
+
+classe_3_a_inf <- 10
+classe_3_a_sup <- 15
+f_3_a <- 5
+medio_classe_3_a <- mean(c(classe_3_a_inf, classe_3_a_sup))
+
+classe_4_a_inf <- 15
+classe_4_a_sup <- 20
+f_4_a <- 2
+medio_classe_4_a <- mean(c(classe_4_a_inf, classe_4_a_sup))
+```
+
+O valor da média amostral é dado pela fórmula
+$$
+\bar{X} = \frac{f_1 \cdot \text{médio}_1 + f_2 \cdot \text{médio}_2 + f_3 \cdot \text{médio}_3 + f_4 \cdot \text{médio}_4  }{f_1+f_2+f_3+f_4}
+$$
+Assim, para a amostra em questão a média, $\mu_{\text{global}}$, é:
+
+```{r,}
+mu_9_a <- (f_1_a*medio_classe_1_a+f_2_a*medio_classe_2_a+
+           f_3_a*medio_classe_3_a+f_4_a*medio_classe_4_a)/   
+          (f_1_a+f_2_a+f_3_a+f_4_a)
+mu_9_a
+```
+
+Já para o cálculo do desvio-padrão, precisamos também criar as variáveis dadas por $f_i \cdot \text{médio}_i^2$ para cada $i$.
+
+```{r,}
+f_1_m_1_a <- f_1_a*medio_classe_1_a*medio_classe_1_a
+f_2_m_2_a <- f_2_a*medio_classe_2_a*medio_classe_2_a
+f_3_m_3_a <- f_3_a*medio_classe_3_a*medio_classe_3_a
+f_4_m_4_a <- f_4_a*medio_classe_4_a*medio_classe_4_a
+```
+
+O valor do desvio-padrão é dado pela raiz quadrada da expressão 
+$$
+\frac{f_1 \cdot \text{médio}_1^2 +  \cdot f_2 \cdot \text{médio}_2^2 +  \cdot f_3 \cdot \text{médio}_3^2 + \cdot f_4 \cdot \text{médio}_4^2}{f_1+f_2+f_3+f_4} - (\mu_{\text{global}})^2
+$$
+
+Portanto, o desvio-padrão é:
+```{r,}
+var_9_a <- (sum(f_1_m_1_a,f_2_m_2_a,f_3_m_3_a,f_4_m_4_a)/
+          sum(f_1_a,f_2_a,f_3_a,f_4_a)) - (mu_9_a)*(mu_9_a)
+sd_9_a <- sqrt(var_9_a)
+sd_9_a
+```
+
+Enfim, o intervalo de confiança fica:
+
+```{r,}
+n_9_a <- f_1_a+f_2_a+f_3_a+f_4_a
+alfa_9_a <- 0.05
+t_9_a <- qt(alfa_9_a/2, n_9_a-1, lower.tail = FALSE)
+```
+
+```{r, class.source="bg-warning", class.output="bg-success"}
+cat("IC(mu,", paste(100*(1-alfa_9_a), "%): ["), min(mu_9_a - t_9_a*sd_9_a/sqrt(n_9_a),
+                                                    mu_9_a + t_9_a*sd_9_a/sqrt(n_9_a)),
+    ";", max(mu_9_a - t_9_a*sd_9_a/sqrt(n_9_a),
+              mu_9_a + t_9_a*sd_9_a/sqrt(n_9_a)),
+    "]")
+```
+
+O intervalo acima contém a média populacional com 95\% de confiança.
+
+**b)** \begin{center} \begin{tabular}{l|c|c|c|c|c|c} \textbf{Classes} & 15--18 & 18--21 & 21--24 & 24--27 & 27--30 & 30--33 \\ \hline $F_i$ & 8 & 9 & 12 & 15 & 7 & 4 \\ \end{tabular} \end{center}
+
+**R.** Vamos incluir os dados da seguinte maneira:
+
+```{r,}
+classe_1_b_inf <- 15
+classe_1_b_sup <- 18
+f_1_b <- 8
+medio_classe_1_b <- mean(c(classe_1_b_inf, classe_1_b_sup))
+
+classe_2_b_inf <- 18
+classe_2_b_sup <- 21
+f_2_b <- 9
+medio_classe_2_b <- mean(c(classe_2_b_inf, classe_2_b_sup))
+
+classe_3_b_inf <- 21
+classe_3_b_sup <- 24
+f_3_b <- 12
+medio_classe_3_b <- mean(c(classe_3_b_inf, classe_3_b_sup))
+
+classe_4_b_inf <- 24
+classe_4_b_sup <- 27
+f_4_b <- 15
+medio_classe_4_b <- mean(c(classe_4_b_inf, classe_4_b_sup))
+
+classe_5_b_inf <- 27
+classe_5_b_sup <- 30
+f_5_b <- 7
+medio_classe_5_b <- mean(c(classe_5_b_inf, classe_5_b_sup))
+
+classe_6_b_inf <- 30
+classe_6_b_sup <- 33
+f_6_b <- 4
+medio_classe_6_b <- mean(c(classe_6_b_inf, classe_6_b_sup))
+```
+
+Para a amostra em questão a média, $\mu_{\text{global}}$, é:
+
+```{r,}
+mu_9_b <- (f_1_b*medio_classe_1_b+f_2_b*medio_classe_2_b+f_3_b*medio_classe_3_b+
+           f_4_b*medio_classe_4_b+f_5_b*medio_classe_5_b+f_6_b*medio_classe_6_b)/ 
+          (f_1_b+f_2_b+f_3_b+f_4_b+f_5_b+f_6_b)
+mu_9_b
+```
+
+Já para o cálculo do desvio-padrão, precisamos também criar as variáveis dadas por $f_i \cdot \text{médio}_i^2$ para cada $i$.
+
+```{r,}
+f_1_m_1_b <- f_1_b*medio_classe_1_b*medio_classe_1_b
+f_2_m_2_b <- f_2_b*medio_classe_2_b*medio_classe_2_b
+f_3_m_3_b <- f_3_b*medio_classe_3_b*medio_classe_3_b
+f_4_m_4_b <- f_4_b*medio_classe_4_b*medio_classe_4_b
+f_5_m_5_b <- f_5_b*medio_classe_5_b*medio_classe_5_b
+f_6_m_6_b <- f_6_b*medio_classe_6_b*medio_classe_6_b
+```
+
+Portanto, o desvio-padrão é:
+```{r,}
+var_9_b <- (sum(f_1_m_1_b,f_2_m_2_b,f_3_m_3_b,f_4_m_4_b, f_5_m_5_b, f_6_m_6_b)/
+          sum(f_1_b,f_2_b,f_3_b,f_4_b,f_5_b,f_6_b)) - (mu_9_b)*(mu_9_b)
+sd_9_b <- sqrt(var_9_b)
+sd_9_b
+```
+
+Enfim, o intervalo de confiança fica:
+
+```{r,}
+n_9_b <- f_1_b+f_2_b+f_3_b+f_4_b+f_5_b+f_6_b
+alfa_9_b <- 0.05
+t_9_b <- qt(alfa_9_b/2, n_9_b-1, lower.tail = FALSE)
+```
+
+```{r, class.source="bg-warning", class.output="bg-success"}
+cat("IC(mu,", paste(100*(1-alfa_9_b), "%): ["), min(mu_9_b - t_9_b*sd_9_b/sqrt(n_9_b),
+                                                    mu_9_b + t_9_b*sd_9_b/sqrt(n_9_b)),
+    ";", max(mu_9_b - t_9_b*sd_9_b/sqrt(n_9_b),
+              mu_9_b + t_9_b*sd_9_b/sqrt(n_9_b)),
+    "]")
+```
+
+O intervalo acima contém a média populacional com 95\% de confiança.
+
+**c)** \begin{center} \begin{tabular}{l|c|c|c|c} \textbf{Classes} & 2,2--6,2 & 6,2--10,2 & 10,2--14,2 & 14,2--18,2 \\ \hline $F_i$ & 3 & 4 & 5 & 3 \\ \end{tabular} \end{center}
+
+**R.** Vamos incluir os dados da seguinte maneira:
+
+```{r,}
+classe_1_c_inf <- 2.2
+classe_1_c_sup <- 6.2
+f_1_c <- 3
+medio_classe_1_c <- mean(c(classe_1_c_inf, classe_1_c_sup))
+
+classe_2_c_inf <- 6.2
+classe_2_c_sup <- 10.2
+f_2_c <- 4
+medio_classe_2_c <- mean(c(classe_2_c_inf, classe_2_c_sup))
+
+classe_3_c_inf <- 10.2
+classe_3_c_sup <- 14.2
+f_3_c <- 5
+medio_classe_3_c <- mean(c(classe_3_c_inf, classe_3_c_sup))
+
+classe_4_c_inf <- 14.2
+classe_4_c_sup <- 18.2
+f_4_c <- 3
+medio_classe_4_c <- mean(c(classe_4_c_inf, classe_4_c_sup))
+```
+
+Assim, para a amostra em questão a média, $\mu_{\text{global}}$, é:
+
+```{r,}
+mu_9_c <- (f_1_c*medio_classe_1_c+f_2_c*medio_classe_2_c+
+           f_3_c*medio_classe_3_c+f_4_c*medio_classe_4_c)/
+          (f_1_c+f_2_c+f_3_c+f_4_c)
+mu_9_c
+```
+
+Já para o cálculo do desvio-padrão, precisamos também criar as variáveis dadas por $f_i \cdot \text{médio}_i^2$ para cada $i$.
+
+```{r,}
+f_1_m_1_c <- f_1_c*medio_classe_1_c*medio_classe_1_c
+f_2_m_2_c <- f_2_c*medio_classe_2_c*medio_classe_2_c
+f_3_m_3_c <- f_3_c*medio_classe_3_c*medio_classe_3_c
+f_4_m_4_c <- f_4_c*medio_classe_4_c*medio_classe_4_c
+```
+
+Portanto, o desvio-padrão é:
+```{r,}
+var_9_c <- (sum(f_1_m_1_c,f_2_m_2_c,f_3_m_3_c,f_4_m_4_c)/
+          sum(f_1_c,f_2_c,f_3_c,f_4_c)) - (mu_9_c)*(mu_9_c)
+sd_9_c <- sqrt(var_9_c)
+sd_9_c
+```
+
+Enfim, o intervalo de confiança fica:
+
+```{r, }
+n_9_c <- f_1_c+f_2_c+f_3_c+f_4_c
+alfa_9_c <- 0.05
+t_9_c <- qt(alfa_9_c/2, n_9_c-1, lower.tail = FALSE)
+```
+
+```{r, class.source="bg-warning", class.output="bg-success"}
+cat("IC(mu,", paste(100*(1-alfa_9_c), "%): ["), min(mu_9_c - t_9_c*sd_9_c/sqrt(n_9_c),
+                                                    mu_9_c + t_9_c*sd_9_c/sqrt(n_9_c)),
+    ";", max(mu_9_c - t_9_c*sd_9_c/sqrt(n_9_c),
+              mu_9_c + t_9_c*sd_9_c/sqrt(n_9_c)),
+    "]")
+```
+
+O intervalo acima contém a média populacional com 95\% de confiança.
+
+## **Para a variância populacional**
+
+<center><b>Tabela 2: Formulário - IC para variância e desvio-padrão populacionais</b></center>
+
+```{r, echo = FALSE}
+tab_2 <- data.frame(`Estatística` = c("Variância", "Desvio-padrão"),
+                    `Fórmula` = c("$P\\left(\\frac{(n-1) \\cdot S^2}{\\chi^2_{sup; n-1}} \\leq \\sigma^2 \\leq \\frac{(n-1) \\cdot S^2}{\\chi^2_{inf;n-1}}\\right)=1-\\alpha$",
+                                "$P\\left(\\sqrt{\\frac{(n-1) \\cdot S^2}{\\chi^2_{sup; n-1}} \\leq \\sigma^2 \\leq \\frac{(n-1) \\cdot S^2}{\\chi^2_{inf;n-1}}}\\right)=1-\\alpha$"))
+knitr::kable(tab_2, escape = FALSE, align = rep("c",2))
+```
+
+### 10.
+
+Supondo populações normais, construir o intervalo de confiança para a variância ao nível de 90\% para a amostras:
+
+**a)** 44,9 -- 44,1 -- 43 -- 42,9 -- 43,2 -- 44,5;
+
+**R.** A atenção agora é para o fato de estarmos calculando um IC para variância. Portanto, faremos uso da primeira fórmula na Tabela 2. Vamos imputar os dados e calcular a variância amostral:
+
+```{r, class.source="bg-warning", class.output="bg-success"}
+amostra_10_a <- c(44.9, 44.1, 43, 42.9, 43.2, 44.5)
+var_10_a <- var(amostra_10_a)
+```
+
+Basta agora aplicarmos a fórmula, sem esquecer de selecionar as caudas corretas da distribuição para cada parte do IC.
+
+```{r,}
+n_10_a <- length(amostra_10_a)
+alfa_10_a <- 0.1
+q_inf_10_a <- qchisq(alfa_10_a/2, n_10_a-1)
+q_sup_10_a <- qchisq(alfa_10_a/2, n_10_a-1, lower.tail = FALSE)
+```
+
+```{r, class.source="bg-warning", class.output="bg-success"}
+cat("IC(sigma²,", paste(100*(1-alfa_10_a), "%): ["), (n_10_a-1)*var_10_a/q_sup_10_a,
+    ";", (n_10_a-1)*var_10_a/q_inf_10_a,
+    "]")
+```
+
+O intervalo acima contém a variância populacional com 90\% de confiança.
+
+**b)** 2 -- 2 -- 2 -- 3 -- 3 -- 4 -- 5 -- 5 -- 5 -- 5 -- 6 -- 6 -- 7 -- 7 -- 8;
+
+**R.** Vamos imputar os dados e calcular a variância amostral:
+
+```{r, }
+amostra_10_b <- c(2,2,2,3,3,4,5,5,5,5,6,6,7,7,8)
+var_10_b <- var(amostra_10_b)
+```
+
+Basta agora aplicarmos a fórmula, sem esquecer de selecionar as caudas corretas da distribuição para cada parte do IC.
+
+```{r,}
+n_10_b <- length(amostra_10_b)
+alfa_10_b <- 0.1
+q_inf_10_b <- qchisq(alfa_10_b/2, n_10_b-1)
+q_sup_10_b <- qchisq(alfa_10_b/2, n_10_b-1, lower.tail = FALSE)
+```
+
+```{r, class.source="bg-warning", class.output="bg-success"}
+cat("IC(sigma²,", paste(100*(1-alfa_10_b), "%): ["), (n_10_b-1)*var_10_b/q_sup_10_b,
+    ";", (n_10_b-1)*var_10_b/q_inf_10_b,
+    "]")
+```
+
+O intervalo acima contém a variância populacional com 90\% de confiança.
+
+### 11.
+
+Suponhamos que uma amostra de $n=10$ fornecesse $S^2=2,25$. Quais os limites de confiança a 80\% para a verdadeira variância?
+
+**R.** Basta substituírmos diretamente os valores:
+
+```{r,}
+n_11 <- 10
+var_11 <- 2.25
+alfa_11 <- 1-0.80
+q_inf_11 <- qchisq(alfa_11/2, n_11-1)
+q_sup_11 <- qchisq(alfa_11/2, n_11-1, lower.tail = FALSE)
+```
+
+```{r, class.source="bg-warning", class.output="bg-success"}
+cat("IC(sigma²,", paste(100*(1-alfa_11), "%): ["), (n_11-1)*var_11/q_sup_11,
+    ";", (n_11-1)*var_11/q_inf_11,
+    "]")
+```
+
+O intervalo acima contém a variância populacional com 80\% de confiança.
+
+### 12.
+
+Sendo $X$ uma população tal que $X = N(\mu, \sigma^2)$ em que $\mu$ e $\sigma^2$ são desconhecidos. Uma amostra de tamanho 15 forneceu os valores $\sum x_i = 8,7$ e $\sum x_i^2 = 27,3$. Determinar um intervalo de confiança de 95\% para $\sigma^2$.
+
+**R.** Sabemos que a variância amostral é dada pela fórmula $S^2 = \frac{\sum (x_i-\bar{x})^2}{n-1}$. Vamos manipular o numerador:
+$$
+\sum (x_i-\bar{x})^2 = \sum (x_i^2 - 2x_i\bar{x} + \bar{x}^2) = \sum x_i^2 - 2\bar{x}\sum x_i + n \cdot \bar{x}^2
+$$
+
+Mas do enunciado já temos $\sum x_i$ e $\sum x_i^2$. Lembrando que $\bar{x} = \frac{\sum x_i}{n}$, obtemos que a variância amostral é:
+
+```{r, }
+var_12 <- (27.3 - 2*(8.7/15)*8.7 + 15*(8.7/15)*(8.7/15))/(15-1)
+var_12
+```
+
+Logo, o intervalo pedido é:
+
+```{r,}
+n_12 <- 15
+alfa_12 <- 0.05
+q_inf_12 <- qchisq(alfa_12/2, n_12-1)
+q_sup_12 <- qchisq(alfa_12/2, n_12-1, lower.tail = FALSE)
+```
+
+```{r, class.source="bg-warning", class.output="bg-success"}
+cat("IC(sigma²,", paste(100*(1-alfa_12), "%): ["), (n_12-1)*var_12/q_sup_12,
+    ";", (n_12-1)*var_12/q_inf_12,
+    "]")
+```
+
+O intervalo acima contém a variância populacional com 95\% de confiança.
+
+### 13.
+
+Determinar, ao nível de 99\%, o intervalo para o desvio-padrão da população que deu origem à amostra do exercício 6 desta série.
+
+**R.** O único cuidado aqui é usar a raiz quadrado, pois o intervalo é para o desvio-padrão e não para a variância.
+
+```{r,}
+amostra_13 <- c(250,265,267,269,271,275,277,281,283,284,
+               287,289,291,293,293,298,301,303,306,307,
+               307,309,311,315,319,322,324,328,335,339)
+alfa_13 <- 0.01
+var_13 <- var(amostra_13)
+n_13 <- length(amostra_13)
+q_inf_13 <- qchisq(alfa_13/2, n_13-1)
+q_sup_13 <- qchisq(alfa_13/2, n_13-1, lower.tail = FALSE)
+```
+
+
+```{r, class.source="bg-warning", class.output="bg-success"}
+cat("IC(sigma,", paste(100*(1-alfa_13), "%): ["), sqrt((n_13-1)*var_13/q_sup_13),
+    ";", sqrt((n_13-1)*var_13/q_inf_13),
+    "]")
+```
+
+O intervalo acima contém o desvio-padrão populacional com 99\% de confiança.
+
+### 14.
+
+Qual é o intervalo de confiança que conterá com 90\% a verdadeira variância de uma população normal que resultou $\sum X_i = 700,8$ e $\sum X_i^2=23436,80$ de uma amostra de 30 elementos? 
+
+**R.** A ideia é a mesma da questão 12, apenas com valores diferentes.
+
+```{r, }
+var_14 <- (23436.80 - 2*(700.8/30)*700.8 + 30*(700.8/30)*(700.8/30))/(30-1)
+var_14
+```
+
+Logo, o intervalo pedido é:
+
+```{r,}
+n_14 <- 30
+alfa_14 <- 0.1
+q_inf_14 <- qchisq(alfa_14/2, n_14-1)
+q_sup_14 <- qchisq(alfa_14/2, n_14-1, lower.tail = FALSE)
+```
+
+```{r, class.source="bg-warning", class.output="bg-success"}
+cat("IC(sigma²,", paste(100*(1-alfa_14), "%): ["), (n_14-1)*var_14/q_sup_14,
+    ";", (n_14-1)*var_14/q_inf_14,
+    "]")
+```
+
+O intervalo acima contém a variância populacional com 90\% de confiança.
+
+## **Para a proporção populacional**
+
+<center><b>Tabela 3: Formulário - IC para proporção populacional</b></center>
+
+```{r, echo = FALSE}
+tab_3 <- data.frame(`População` = c("Infinita", "Finita"),
+                    `Fórmula` = c("$P\\left(f - Z_{\\alpha/2} \\cdot \\sqrt{\\frac{f \\cdot (1-f)}{n}} \\leq p \\leq f + Z_{\\alpha/2} \\cdot \\sqrt{\\frac{f \\cdot (1-f)}{n}}\\right)=1-\\alpha$",
+                                "$P\\left(f - Z_{\\alpha/2} \\cdot \\sqrt{\\frac{f \\cdot (1-f)}{n} \\cdot \\left(\\frac{N-n}{N-1}\\right)} \\leq p \\leq f + Z_{\\alpha/2} \\cdot \\sqrt{\\frac{f \\cdot (1-f)}{n} \\cdot  \\left(\\frac{N-n}{N-1}\\right)} \\right)=1-\\alpha$"))
+knitr::kable(tab_3, escape = FALSE, align = rep("c",2))
+```
+
+### 15.
+
+Uma centena de componentes foi ensaiada e 93 deles funcionaram mais de 500 horas. Determinar um intervalo de confiança de 95\% para a proporção.
+
+**R.** Novamente é preciso atenção. Agora o intervalo é para uma proporção. Temos:
+
+```{r,}
+x_15 <- 93
+n_15 <- 100
+f_15 <- x_15/n_15
+alfa_15 <- 0.05
+z_15 <- qnorm(alfa_15/2, lower.tail = FALSE)
+```
+
+```{r, class.source="bg-warning", class.output="bg-success"}
+cat("IC(p,", paste(100*(1-alfa_15), "%): ["), f_15 - z_15*sqrt(f_15*(1-f_15)/n_15),
+    ";", f_15 + z_15*sqrt(f_15*(1-f_15)/n_15), "]")
+```
+
+O intervalo acima contém a proporção populacional com 95\% de confiança.
+
+### 16.
+
+Uma amostra aleatória de 400 domícilios mostra-nos que 25\% delas são casas de aluguel. Qual é o intervalo de confiança da proporção e casas de aluguel? $\alpha=2\%$.
+
+**R.** O caminho é o mesmo do item anterior, porém com atenção pois o enunciado forneceu diretamente a proporção amostral dessa vez.
+
+```{r, }
+n_16 <- 400
+f_16 <- 0.25
+alfa_16 <- 0.02
+z_16 <- qnorm(alfa_16/2, lower.tail = FALSE)
+```
+
+```{r, class.source="bg-warning", class.output="bg-success"}
+cat("IC(p,", paste(100*(1-alfa_16), "%): ["), f_16 - z_16*sqrt(f_16*(1-f_16)/n_16),
+    ";", f_16 + z_16*sqrt(f_16*(1-f_16)/n_16), "]")
+```
+
+O intervalo acima contém a proporção populacional com 98\% de confiança.^[Essa resposta diverge do gabarito oficial e acredito que o erro seja no livro, pois o resultado é confirmado por diversas calculadoras e também pelo gabarito [aqui](https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=&ved=2ahUKEwj_4J2tytbvAhUXEbkGHcw6A-EQFjADegQIAhAD&url=https%3A%2F%2Fedisciplinas.usp.br%2Fmod%2Fresource%2Fview.php%3Fid%3D941297&usg=AOvVaw2Hed1DAy_d9jB9yTeWb2TU).]
+
+### 17.
+
+Em 50 lances de uma moeda, foram obtidas 30 caras. A partir de um intervalo de confiança de 96\%, pode-se dizer que a moeda é honesta? 
+
+**R.** Se a moeda for honesta, então é esperado que a proporção populacional de caras seja aproximadamente de 50\%. Vamos calcular o IC para essa proporção e checar se o valor 0,5 se encontra nele.
+
+```{r,}
+x_17 <- 30
+n_17 <- 50
+f_17 <- x_17/n_17
+alfa_17 <- 0.04
+z_17 <- qnorm(alfa_17/2, lower.tail = FALSE)
+```
+
+```{r, class.source="bg-warning", class.output="bg-success"}
+cat("IC(p,", paste(100*(1-alfa_17), "%): ["), f_17 - z_17*sqrt(f_17*(1-f_17)/n_17),
+    ";", f_17 + z_17*sqrt(f_17*(1-f_17)/n_17), "]")
+```
+
+Como o intervalo contem o valor 0,50, podemos dizer que, com 96\% de confiança, a moeda é honesta.
+
+### 18.
+
+Para verifcar se um dado era viciado, jogou-se o mesmo 120 vezes, obtendo-se 25 vezes o número cinco. Calcular um intervalo de confiança para a proporção $\alpha=1\%$. Pode-se dizer que o dado é viciado? 
+
+**R.** Para o caso de um dado não-viciado, a proporção esperada de cada número é de aproximadamente 0,167 (um sexto). Dessa forma, se ao calcularmos o IC nós não verificarmos que o valor 0,167 se encontra nele, então poderemos dizer que o dado é viciado. Temos:
+
+```{r,}
+x_18 <- 25
+n_18 <- 120
+f_18 <- x_18/n_18
+alfa_18 <- 0.01
+z_18 <- qnorm(alfa_18/2, lower.tail = FALSE)
+```
+
+```{r, class.source="bg-warning", class.output="bg-success"}
+cat("IC(p,", paste(100*(1-alfa_18), "%): ["), f_18 - z_18*sqrt(f_18*(1-f_18)/n_18),
+    ";", f_18 + z_18*sqrt(f_18*(1-f_18)/n_18), "]")
+```
+
+Como o IC contém a proporção esperada, não podemos dizer que o dado é viciado.
+
+### 19.
+
+Uma amostra de 300 habitantes de uma cidade mostrou que 180 desejavam a água fluorada. Encontrar os limites de confiança de 90\% e 95\% para a proporção da população favorável a fluoração.
+
+**a.** 90\%:
+
+**R.** O jeito de resolver continua o mesmo:
+
+```{r, }
+x_19 <- 180
+n_19 <- 300
+f_19 <- x_19/n_19
+alfa_19_a <- 0.1
+z_19_a <- qnorm(alfa_19_a/2, lower.tail = FALSE)
+```
+
+```{r, class.source="bg-warning", class.output="bg-success"}
+cat("IC(p,", paste(100*(1-alfa_19_a), "%): ["), f_19 - z_19_a*sqrt(f_19*(1-f_19)/n_19),
+    ";", f_19 + z_19_a*sqrt(f_19*(1-f_19)/n_19), "]")
+```
+
+O intervalo acima contém a proporção populacional com 90\% de confiança.
+
+**b.** 95\%:
+
+**R.** Basta alterarmos o nível de confiança:
+
+```{r, }
+alfa_19_b <- 0.05
+z_19_b <- qnorm(alfa_19_b/2, lower.tail = FALSE)
+```
+
+```{r, class.source="bg-warning", class.output="bg-success"}
+cat("IC(p,", paste(100*(1-alfa_19_b), "%): ["), f_19 - z_19_b*sqrt(f_19*(1-f_19)/n_19),
+    ";", f_19 + z_19_b*sqrt(f_19*(1-f_19)/n_19), "]")
+```
+
+O intervalo acima contém a proporção populacional com 95\% de confiança.

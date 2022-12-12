@@ -1,0 +1,112 @@
+---
+header-includes:
+- \usepackage{booktabs}
+- \usepackage{float}
+title: "Regressão Linear Multivariada"
+output: 
+  pdf_document: 
+    keep_tex: no
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.height = 3, fig.width = 6)
+library(xtable)
+library(ggplot2)
+library(lmtest)
+library(forecast)
+library(cowplot)
+options(xtable.comment = FALSE)
+```
+
+```{r codigo, include = FALSE, echo = FALSE, cache=TRUE}
+#### Importando os dados ####
+
+dados <- read.csv("autos.csv", sep = ";")
+
+#### Convertendo a variável length para numérica ####
+
+dados$length <- gsub(",", ".", dados$length)
+dados$length <- as.numeric(dados$length)
+
+#### 1) Modelo de regressão linear: price ~ horsepower + length + engine.size + city.mpg ####
+
+reg <- lm(price ~ horsepower + length + engine.size + city.mpg, data = dados)
+summary(reg)
+bptest(reg)
+
+residuos_g <- ggplot(data = data.frame(x = seq(from = 1, by = 1, length.out = length(reg$residuals)), y=reg$residuals)) + 
+              geom_line(aes(x, y)) +
+              labs(x = "Observação", y = "Resíduo", title = "Resíduos") + 
+              theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                             axis.line.x = element_line(size = 1, colour = "black"),
+                             axis.line.y = element_line(size = 1, colour = "black"))
+
+residuos_pacf <- ggPacf(reg$residuals) +
+                 labs(title = "Função de autocorrelação parcial dos resíduos") +
+                 theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                       axis.line.x = element_line(size = 1, colour = "black"),
+                       axis.line.y = element_line(size = 1, colour = "black"))
+
+plot_grid(residuos_g, residuos_pacf, align = "hv")
+
+residuos_ajustados <- ggplot(data = data.frame(y = reg$residuals, x = reg$fitted.values),
+                             aes(x = x, y = y)) + 
+                      geom_point() + 
+                      geom_hline(yintercept = 0, linetype = "dashed", colour = "red") +
+                      labs(title = "Resíduos x Valores Ajustados", y = "Resíduos", x = "Valores Ajustados") +
+                      theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                            axis.line.x = element_line(size = 1, colour = "black"),
+                            axis.line.y = element_line(size = 1, colour = "black"))
+
+residuos_qq_normal <- ggplot(data = data.frame(x = reg$residuals), aes(sample = x)) + 
+                      stat_qq(col = "black") + 
+                      stat_qq_line(col = "blue") + 
+                      labs(title = "Curva Normal-QQ", x = "Teórico", y = "Amostra") +
+                      theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                            axis.line.x = element_line(size = 1, colour = "black"),
+                            axis.line.y = element_line(size = 1, colour = "black"))
+
+residuos_hist <- ggplot(data = data.frame(x = reg$residuals), aes(x = x)) + 
+                 geom_bar(width = 1, fill = "skyblue", color = "black") + 
+                 scale_x_binned() + 
+                 labs(title = "Histograma - resíduos", x = "Resíduos", y = "Freq. absoluta") + 
+                 theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                       axis.line.x = element_line(size = 1, colour = "black"),
+                       axis.line.y = element_line(size = 1, colour = "black"))
+
+g_temp <- plot_grid(residuos_qq_normal, residuos_hist, align = "hv")
+plot_grid(residuos_ajustados, g_temp, nrow = 2, axis = "tblr")
+```
+
+## EXERCÍCIO 1
+
+### Modelo de regressão: preço em função de cavalos de potência, comprimento, tamanho do motor e rendimento na cidade
+
+```{r summary_reg, echo = FALSE}
+summary(reg, type = "latex")
+```
+
+O modelo estimado foi: 
+$$\hat{price}_i = -28480 + 52,74 \cdot horsepower_i + 114,58 \cdot length_i + 115,32 \cdot engine.size_i + 61,51 \cdot city.mpg_i$$
+
+O p-valor da estatística F indica que rejeitamos a hipótese nula de ausência de significância global da regressão, isto é, pelo menos um dos coeficientes estimados é estatisticamente diferente de 0. Analisando o $R^2$, vemos que $81,68\%$ das variações no preço são explicadas pelo conjunto de variáveis explicativas utilizado.
+
+Analisando os coeficientes indiviualmente, vemos que com exceção do rendimento do veículo na cidade (city.mpg), todas as variáveis são estatisticamente significativas a $1\%$. A análise dos coeficientes que foram significativos indica que:
+
+1. Um aumento de uma unidade na potência está associado a um aumento de 52,74 unidades no preço;
+2. Um aumento de 1 unidade no comprimento está associado a um aumento de 114,58 unidades no preço;
+3. Um aumento de 1 unidade no tamanho do motor está associado a aumento de 115,32 unidades no preço.
+
+Em seguida, temos os gráficos de diagnóstico do modelo:
+
+``` {r, echo = FALSE, fig.height = 5, fig.width = 10}
+plot_grid(residuos_ajustados, g_temp, nrow = 2, axis = "tblr")
+```
+Observando o gráfico dos resíduos x valores ajustados, podemos perceber que claramente ele apresenta sinais de heterocedasticidade. Realizando o teste de Breusch-Pagan, obtemos:
+
+```{r, echo = FALSE}
+bptest(reg)
+```
+apontando para a rejeição da hipótese nula de homocedasticidade.
+
+Em relação a distribuição dos resíduos, enquanto as 'pontas' aparentam ser assimétricas, o centro da distribuição parece ser simétrico. Apesar disso, o conjunto dos gráficos claramente aponta para o não-atendimento da hipótese de normalidade dos resíduos.

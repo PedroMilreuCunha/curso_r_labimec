@@ -1,0 +1,187 @@
+---
+header-includes:
+- \usepackage{booktabs}
+- \usepackage{float}
+title: "Regressão Logística"
+output: 
+  pdf_document: 
+    keep_tex: no
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.height = 3, fig.width = 6)
+library(ggplot2)
+library(lmtest)
+library(cowplot)
+library(dplyr)
+library(mfx)
+options(xtable.comment = FALSE)
+```
+
+```{r codigo, include = FALSE}
+#### EXERCÍCIO 1 ####
+
+#### a) Importação e limpeza dos dados ####
+
+## Importando os dados
+
+dados <- read.csv("titanic_train.csv")
+
+desejadas <- c("Survived", "Pclass", "Sex", "Age", "SibSp", "Parch", "Fare", "Embarked", "PassengerId")
+
+dados <- dados %>% dplyr::select(desejadas)
+
+## Mudança dos NAs na idade 
+
+indice_NAs <- which(is.na(dados$Age))
+valor <- rep(mean(dados$Age, na.rm = TRUE), length(indice_NAs))
+dados$Age <- replace(dados$Age, indice_NAs, valor)
+
+## Remoção dos NAs restantes (caso existam)
+
+dados <- na.omit(dados)
+dados$Pclass <- as.factor(dados$Pclass)
+
+#### b) Modelo de regressão linear: survived ~ . ####
+
+reg_1 <- lm(Survived ~ Pclass + Sex + Age + SibSp + Parch + Fare + Embarked,
+            data = dados)
+summary(reg_1)
+summary(reg_1$fitted.values)
+bptest(reg_1)
+
+residuos_ajustados_1 <- ggplot(data = data.frame(y = reg_1$residuals, x = reg_1$fitted.values),
+                             aes(x = x, y = y)) + 
+                        geom_point() + 
+                        geom_hline(yintercept = 0, linetype = "dashed", colour = "red") +
+                        labs(title = "Resíduos x Valores Ajustados", y = "Resíduos", x = "Valores Ajustados") +
+                        theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                              axis.line.x = element_line(size = 1, colour = "black"),
+                              axis.line.y = element_line(size = 1, colour = "black"))
+
+residuos_qq_normal_1 <- ggplot(data = data.frame(x = reg_1$residuals), aes(sample = x)) + 
+                        stat_qq(col = "black") + 
+                        stat_qq_line(col = "blue") + 
+                        labs(title = "Curva Normal-QQ", x = "Teórico", y = "Amostra") +
+                        theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                              axis.line.x = element_line(size = 1, colour = "black"),
+                              axis.line.y = element_line(size = 1, colour = "black"))
+
+residuos_hist_1 <- ggplot(data = data.frame(x = reg_1$residuals), aes(x = x)) + 
+                   geom_bar(width = 1, fill = "skyblue", color = "black") + 
+                   scale_x_binned() + 
+                   labs(title = "Histograma - resíduos", x = "Resíduos", y = "Freq. absoluta") + 
+                   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                         axis.line.x = element_line(size = 1, colour = "black"),
+                         axis.line.y = element_line(size = 1, colour = "black"))
+
+g_temp <- plot_grid(residuos_qq_normal_1, residuos_hist_1, align = "hv")
+plot_grid(residuos_ajustados_1, g_temp, nrow = 2, axis = "tblr")
+
+#### b) Estimando um modelo logit ####
+
+reg_2 <- glm(Survived ~ Pclass + Sex + Age + SibSp + Parch + Fare + Embarked,
+             data = dados, family = "binomial")
+summary(reg_2)
+logitor(Survived ~ Pclass + Sex + Age + SibSp + Parch + Fare + Embarked,
+        data = dados)
+
+#### c) Importando a base de teste ####
+
+dados_teste <- read.csv("titanic_test.csv")
+dados_teste$Survived <- numeric(418)
+
+dados_teste <- dados_teste %>% dplyr::select(desejadas)
+
+## Mudança dos NAs na idade 
+
+indice_NAs <- which(is.na(dados_teste$Age))
+valor <- rep(mean(dados_teste$Age, na.rm = TRUE), length(indice_NAs))
+dados_teste$Age <- replace(dados_teste$Age, indice_NAs, valor)
+
+## Remoção dos NAs restantes (caso existam)
+
+dados_teste <- na.omit(dados_teste)
+dados_teste$Pclass <- as.factor(dados_teste$Pclass)
+
+#### d) Fazendo as previsões ####
+
+dados_teste$Survived <- predict(reg_2, newdata = dados_teste, type = "response")
+
+g_previsao <- ggplot(data = dados_teste, aes(x = PassengerId, y = Survived)) + 
+              geom_point(aes(colour = Sex, shape = Pclass), size = 2.75) + 
+              scale_colour_manual(values = c("skyblue", "red"), labels = c("Feminino", "Masculino")) +
+              guides(colour = guide_legend(title = "Sexo"), shape = guide_legend(title = "Classe do passageiro")) +
+              labs(y = "Prob. de sobrevivência", title = "Probabilidades previstas de sobrevivência") + 
+              theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                    axis.line.x = element_line(size = 1, colour = "black"),
+                    axis.line.y = element_line(size = 1, colour = "black"))
+
+#write.csv(dplyr::select(dados_teste, c("PassengerId", "Survived")), "Previsões - Titanic.csv",
+#          row.names = FALSE)
+
+```
+
+## EXERCÍCIO 1
+
+### a) Modelo de regressão linear: sobreviveu em função de classe do passageiro, sexo, idade, nº de irmãos/esposos abordo do Titanic, nº de parentes/filhos abordo do Titanic, passagem e local de embarque.
+
+```{r summary_reg, echo = FALSE}
+summary(reg_1, type = "latex")
+```
+
+O p-valor da estatística F aponta que a regressão apresentou significância estatística global. Com um $R^2=0,3984$, apenas $39,84\%$ das variações na variável dependente são explicadas pelo conjunto de variáveis explicativas.
+
+Em relação às significâncias individuais, temos que apenas a classe do passengeiro, seu sexo, idade e o número de irmãos/esposos no Titanic. Os resultados indicam que:
+
+1. Passageiros da segunda classe apresentaram um valor $0,1438$ unidades menor para a variável dependente quando comparados aos passageiros da primeira classe;
+
+2. Passageiros da terceira classe apresentaram um valor $0,3346$ unidades menor para a variável dependente quando comparados aos passageiros da primeira classe;
+
+3. Passageiros do sexo masculino apresentaram um valor $0,5021$ unidades menor para a variável dependente quando comparados às passageiras;
+
+4. O aumento de um ano na idade do passageiro esteve associado à uma redução de $0,0058$ unidades na variável dependente;
+
+5. O aumento de uma unidade no número de irmãos/esposos do passageiro esteve associado à uma redução de $0,0410$ unidades na variável dependente.
+
+Analisando agora os gráficos diagnósticos:
+
+``` {r, echo = FALSE, fig.height = 5, fig.width = 10}
+plot_grid(residuos_ajustados_1, g_temp, nrow = 2, axis = "tblr")
+```
+
+Claramente os resíduos são heterocedásticos, o que já era esperado, uma vez que a variável dependente é binária. Apesar disso, eles aparentam ser aproximadamente normais. Entretanto, o maior problema do modelo estimado (e dos modelos de probabilidade linear em geral) é a previsão de valores ajustados maiores do que 1 e menores do que 0, o que é impossível, pois por definição as probabilidades devem ficar entre 0 e 1. Isso pode ser visto abaixo, onde apresentamos a sumarização estatística dos valores previstos:
+
+```{r, echo = FALSE}
+summary(reg_1$fitted.values)
+```
+
+Para corrigir isso, procedemos em seguida à estimação de um modelo de regressão logística.
+
+### b) Modelo de regressão logístico: sobreviveu em função de classe do passageiro, sexo, idade, nº de irmãos/esposos abordo do Titanic, nº de parentes/filhos abordo do Titanic, passagem e local de embarque.
+
+Fazendo a estimação do modelo, obtemos a seguinte sumarização dos resultados
+```{r summary_reg_2, echo = FALSE}
+summary(reg_2, type = "latex")
+```
+
+Veja que as mesmas variáveis continuam sendo significativas, inclusive apresentando os mesmos sinais, entretanto seus coeficientes são diferentes. Por completude, apresentamos abaixo a tabela de razões de chance do modelo.
+
+```{r logit, echo = FALSE}
+logitor(Survived ~ Pclass + Sex + Age + SibSp + Parch + Fare + Embarked,
+        data = dados)
+```
+
+Em seguida, observando o sumário estatístico dos valores estimados,
+```{r, echo = FALSE}
+summary(reg_2$fitted.values)
+```
+podemos perceber que não mais ocorre a presença de probabilidades abaixo de 0 ou acima de 1, sendo está uma das razões que motiva o uso do modelo logístico quando a variável dependente é binária.
+
+Para finalizar, temos abaixo o resultado da utilização do modelo estimado para prever a probabilidade de sobrevivência de uma amostra de 418 passageiros.
+
+```{r, echo = FALSE, fig.height=5, fig.width=10}
+g_previsao
+```
+
+Fica claro que os passageiros que viajaram nas classes inferiores apresentaram menor probabilidade de sobrevivência, assim como os homens.

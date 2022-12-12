@@ -1,0 +1,519 @@
+---
+header-includes:
+- \usepackage{booktabs}
+- \usepackage{float}
+title: "Regressão Linear Simples"
+output: 
+  pdf_document: 
+    keep_tex: no
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.height = 3, fig.width = 6)
+library(xtable)
+library(ggplot2)
+library(lmtest)
+library(cowplot)
+library(forecast)
+options(xtable.comment = FALSE)
+```
+
+```{r codigo, include = FALSE, echo = FALSE, cache=TRUE}
+
+#### EXERCÍCIO 1 ####
+
+#### a) Criando os dados ####
+
+dados_1 <- data.frame(y = c(13,15,16,20,19,17,21,16),
+                      x = c(5.2, 5.1, 4.9, 4.6, 4.7, 4.8, 4.6, 4.9))
+
+#### b) Gráfico de dispersão ####
+
+disp_1 <- ggplot(data = dados_1, aes(x = x, y = y)) + 
+          geom_point() + 
+          theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                axis.line.x = element_line(size = 1, colour = "black"),
+                axis.line.y = element_line(size = 1, colour = "black"))
+
+#### c) Modelo de regressão linear simples: y ~ x ####
+
+reg_1 <- lm(y ~ x, data = dados_1)
+bptest(reg_1)
+summary(reg_1)
+
+residuos_g_1 <- ggplot(data = data.frame(x = seq(from = 1, by = 1, length.out = length(reg_1$residuals)), y=reg_1$residuals)) + 
+                geom_line(aes(x, y)) +
+                labs(x = "Observação", y = "Resíduo", title = "Resíduos") + 
+                theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                      axis.line.x = element_line(size = 1, colour = "black"),
+                      axis.line.y = element_line(size = 1, colour = "black"))
+
+residuos_pacf_1 <- ggPacf(reg_1$residuals) +
+                   labs(title = "Função de autocorrelação parcial dos resíduos") +
+                   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                         axis.line.x = element_line(size = 1, colour = "black"),
+                         axis.line.y = element_line(size = 1, colour = "black"))
+
+plot_grid(residuos_g_1, residuos_pacf_1, align = "hv")
+
+residuos_ajustados_1 <- ggplot(data = data.frame(y = reg_1$residuals, x = reg_1$fitted.values),
+                               aes(x = x, y = y)) + 
+                        geom_point() + 
+                        geom_hline(yintercept = 0, linetype = "dashed", colour = "red") +
+                        labs(title = "Resíduos x Valores Ajustados", y = "Resíduos", x = "Valores Ajustados") +
+                        theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                              axis.line.x = element_line(size = 1, colour = "black"),
+                              axis.line.y = element_line(size = 1, colour = "black"))
+
+residuos_qq_normal_1 <- ggplot(data = data.frame(x = reg_1$residuals), aes(sample = x)) + 
+                        stat_qq(col = "black") + 
+                        stat_qq_line(col = "blue") + 
+                        labs(title = "Curva Normal-QQ", x = "Teórico", y = "Amostra") +
+                        theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                              axis.line.x = element_line(size = 1, colour = "black"),
+                              axis.line.y = element_line(size = 1, colour = "black"))
+
+residuos_hist_1 <- ggplot(data = data.frame(x = reg_1$residuals), aes(x = x)) + 
+                   geom_bar(width = 1, fill = "skyblue", color = "black") + 
+                   scale_x_binned() + 
+                   labs(title = "Histograma - resíduos", x = "Resíduos", y = "Freq. absoluta") + 
+                   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                         axis.line.x = element_line(size = 1, colour = "black"),
+                         axis.line.y = element_line(size = 1, colour = "black"))
+
+g_temp_1 <- plot_grid(residuos_qq_normal_1, residuos_hist_1, align = "hv")
+plot_grid(residuos_ajustados_1, g_temp_1, nrow = 2, axis = "tblr")
+
+
+#### d) Adicionando a reta de regressão ao gráfico de dispersão ####
+
+disp_2 <- ggplot(data = dados_1, aes(x = x, y = y)) + 
+          geom_point() + 
+          geom_smooth(method = "lm", formula = y~x) +
+          theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                axis.line.x = element_line(size = 1, colour = "black"),
+                axis.line.y = element_line(size = 1, colour = "black"))
+
+#### EXERCÍCIO 2 ####
+
+#### a) Importação dos dados e estatísticas descritivas ####
+
+dados_2 <- read.csv("pib_gapminder.csv")
+
+summary(dados_2)
+
+#### b) Estrutura dos dados ####
+
+str(dados_2)
+
+#### c) Categoria das variáveis ####
+
+# País - Qualitativa nominal 
+# Ano - Quantitativa discreta
+# Pop - Quantitativa discreta 
+# Continente - Qualitativa nominal
+# Exp. Vida - Contínua 
+# pibPercap - Contínua
+
+#### d) Tabelas de frequência absoluta e relativa do número de observações por continente ####
+
+t_absoluta <- table(dados_2$continente)
+t_freq <- prop.table(t_absoluta)
+
+t_absoluta <- as.data.frame(t_absoluta)
+t_freq <- as.data.frame(t_freq)
+colnames(t_absoluta) <- c("Continente", "Observações")
+colnames(t_freq) <- c("Continente", "Frequência")
+
+#### e) Gráfico de barras da frequência absoluta por continente ####
+
+barras_2 <- ggplot(data = as.data.frame(t_absoluta), aes(x = Continente, y = Observações, fill = Continente)) + 
+            geom_col(col = "black", show.legend = FALSE) + 
+            labs(x = "Continente", y = "Freq. absoluta",
+                 fill = "Continente") + 
+            theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                  axis.line.x = element_line(size = 1, colour = "black"),          
+                  axis.line.y = element_line(size = 1, colour = "black"))
+
+#### f) Gráfico de dispersão: pib per capita x expectativa de vida ####
+
+disp_3 <- ggplot(data = dados_2, aes(y = pibPercap, x = expVida)) + 
+          geom_point() + 
+          labs(x = "Expectativa de vida", y = "PIB per capita") +
+          theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), 
+                axis.line.x = element_line(size = 1, colour = "black"),              
+                axis.line.y = element_line(size = 1, colour = "black"))
+
+#### g) Criando as colunas com log do pib per capita e da expectativa de vida ####
+
+dados_2$lpibPercap <- log(dados_2$pibPercap)
+dados_2$lexpVida <- log(dados_2$expVida)
+
+#### h) Gráfico de dispersão: log(pib per capita) x log (expectativa de vida) ####
+
+disp_4 <- ggplot(data = dados_2, aes(y = lpibPercap, x = lexpVida)) + 
+          geom_point() + 
+          labs(x = "log(Expectativa de vida)", y = "log(PIB per capita)") +
+          theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                axis.line.x = element_line(size = 1, colour = "black"),           
+                axis.line.y = element_line(size = 1, colour = "black"))
+
+#### i) Regressão linear simples - lexpVida ~ lpibPercap ####
+
+reg_2 <- lm(lexpVida ~ lpibPercap, data = dados_2)
+summary(reg_2)
+bptest(reg_2)
+
+residuos_g_2 <- ggplot(data = data.frame(x = seq(from = 1, by = 1, length.out = length(reg_2$residuals)), y=reg_2$residuals)) + 
+                geom_line(aes(x, y)) +
+                labs(x = "Observação", y = "Resíduo", title = "Resíduos") + 
+                theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                      axis.line.x = element_line(size = 1, colour = "black"),
+                      axis.line.y = element_line(size = 1, colour = "black"))
+
+residuos_pacf_2 <- ggPacf(reg_2$residuals) +
+                   labs(title = "Função de autocorrelação parcial dos resíduos") +
+                   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                         axis.line.x = element_line(size = 1, colour = "black"),
+                         axis.line.y = element_line(size = 1, colour = "black"))
+
+plot_grid(residuos_g_2, residuos_pacf_2, align = "hv")
+
+residuos_ajustados_2 <- ggplot(data = data.frame(y = reg_2$residuals, x = reg_2$fitted.values),
+                               aes(x = x, y = y)) + 
+                        geom_point() +
+                        geom_hline(yintercept = 0, linetype = "dashed", colour = "red") +
+                        labs(title = "Resíduos x Valores Ajustados", y = "Resíduos", x = "Valores Ajustados") +
+                        theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                              axis.line.x = element_line(size = 1, colour = "black"),
+                              axis.line.y = element_line(size = 1, colour = "black"))
+
+residuos_qq_normal_2 <- ggplot(data = data.frame(x = reg_2$residuals), aes(sample = x)) + 
+                        stat_qq(col = "black") + 
+                        stat_qq_line(col = "blue") + 
+                        labs(title = "Curva Normal-QQ", x = "Teórico", y = "Amostra") +
+                        theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                              axis.line.x = element_line(size = 1, colour = "black"),
+                              axis.line.y = element_line(size = 1, colour = "black"))
+
+residuos_hist_2 <- ggplot(data = data.frame(x = reg_2$residuals), aes(x = x)) + 
+                   geom_bar(width = 1, fill = "skyblue", color = "black") + 
+                   scale_x_binned() + 
+                   labs(title = "Histograma - resíduos", x = "Resíduos", y = "Freq. absoluta") + 
+                   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                         axis.line.x = element_line(size = 1, colour = "black"),
+                         axis.line.y = element_line(size = 1, colour = "black"))
+
+g_temp_2 <- plot_grid(residuos_qq_normal_2, residuos_hist_2, align = "hv")
+plot_grid(residuos_ajustados_2, g_temp_2, nrow = 2, axis = "tblr")
+
+
+#### EXERCÍCIO 3 ####
+
+#### a) Criação do dicionário ####
+
+dicionario <- read.csv("dicionario.csv", sep = ":")
+
+#### b) Carregamento dos dados ####
+
+dados_3 <- read.csv("autos.csv", sep = ";")
+
+#### c) Estatíticas descritivas e gráficos iniciais ####
+
+summary(dados_3)
+
+disp_5 <- ggplot(data = dados_3, aes(y = price, x = horsepower)) + 
+          geom_point() + 
+          labs(title = "Gráfico de dispersão: preço x cavalos de potência",
+               x = "Cavalos de potência", y = "Preço") +
+          theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),     
+                axis.line.x = element_line(size = 1, colour = "black"),                 
+                axis.line.y = element_line(size = 1, colour = "black"))
+
+disp_6 <- ggplot(data = dados_3, aes(y = price, x = make, colour = as.factor(make))) + 
+          geom_point() + 
+          geom_boxplot(colour = "black", fill = "skyblue", alpha = 0.15) +
+          labs(title = "Gráfico de dispersão com boxplot: preço x marca",
+               x = "Cavalos de potência", y = "Preço", colour = "Marca") +
+          theme(axis.text.x = element_blank(), panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                axis.line.x = element_line(size = 1, colour = "black"),
+                axis.line.y = element_line(size = 1, colour = "black"))
+
+#### d) Regressão linear simples: preço ~ cavalos de potência ####
+
+reg_3 <- lm(price ~ horsepower, data = dados_3)
+summary(reg_3)
+bptest(reg_3)
+
+residuos_g_3 <- ggplot(data = data.frame(x = seq(from = 1, by = 1, length.out = length(reg_3$residuals)), y=reg_3$residuals)) + 
+                geom_line(aes(x, y)) +
+                labs(x = "Observação", y = "Resíduo", title = "Resíduos") + 
+                theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                      axis.line.x = element_line(size = 1, colour = "black"),
+                      axis.line.y = element_line(size = 1, colour = "black"))
+
+residuos_pacf_3 <- ggPacf(reg_3$residuals) +
+                   labs(title = "Função de autocorrelação parcial dos resíduos") +
+                   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                         axis.line.x = element_line(size = 1, colour = "black"),
+                         axis.line.y = element_line(size = 1, colour = "black"))
+
+plot_grid(residuos_g_3, residuos_pacf_3, align = "hv")
+
+residuos_ajustados_3 <- ggplot(data = data.frame(y = reg_3$residuals, x = reg_3$fitted.values),
+                               aes(x = x, y = y)) + 
+                        geom_point() + 
+                        geom_hline(yintercept = 0, linetype = "dashed", colour = "red") +
+                        labs(title = "Resíduos x Valores Ajustados", y = "Resíduos", x = "Valores Ajustados") +
+                        theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                              axis.line.x = element_line(size = 1, colour = "black"),
+                              axis.line.y = element_line(size = 1, colour = "black"))
+
+residuos_qq_normal_3 <- ggplot(data = data.frame(x = reg_3$residuals), aes(sample = x)) + 
+                        stat_qq(col = "black") + 
+                        stat_qq_line(col = "blue") + 
+                        labs(title = "Curva Normal-QQ", x = "Teórico", y = "Amostra") +
+                        theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                              axis.line.x = element_line(size = 1, colour = "black"),
+                              axis.line.y = element_line(size = 1, colour = "black"))
+
+residuos_hist_3 <- ggplot(data = data.frame(x = reg_3$residuals), aes(x = x)) + 
+                   geom_bar(width = 1, fill = "skyblue", color = "black") + 
+                   scale_x_binned() + 
+                   labs(title = "Histograma - resíduos", x = "Resíduos", y = "Freq. absoluta") + 
+                   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                         axis.line.x = element_line(size = 1, colour = "black"),
+                         axis.line.y = element_line(size = 1, colour = "black"))
+
+
+g_temp_3 <- plot_grid(residuos_qq_normal_3, residuos_hist_3, align = "hv")
+plot_grid(residuos_ajustados_3, g_temp_3, nrow = 2, axis = "tblr")
+
+#### e) Regressão linear simples: preço ~ cavalos de potência pela origem ####
+
+reg_4 <- lm(price ~ horsepower+0, data = dados_3)
+summary(reg_4)
+
+residuos_g_4 <- ggplot(data = data.frame(x = seq(from = 1, by = 1, length.out = length(reg_4$residuals)), y=reg_4$residuals)) + 
+                geom_line(aes(x, y)) +
+                labs(x = "Observação", y = "Resíduo", title = "Resíduos") + 
+                theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                      axis.line.x = element_line(size = 1, colour = "black"),
+                      axis.line.y = element_line(size = 1, colour = "black"))
+
+residuos_pacf_4 <- ggPacf(reg_4$residuals) +
+                   labs(title = "Função de autocorrelação parcial dos resíduos") +
+                   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                         axis.line.x = element_line(size = 1, colour = "black"),
+                         axis.line.y = element_line(size = 1, colour = "black"))
+
+plot_grid(residuos_g_4, residuos_pacf_4, align = "hv")
+
+residuos_ajustados_4 <- ggplot(data = data.frame(x = reg_4$residuals, y = reg_4$fitted.values),
+                               aes(x = x, y = y)) + 
+                        geom_point() + 
+                        geom_hline(yintercept = 0, linetype = "dashed", colour = "red") +
+                        labs(title = "Resíduos x Valores Ajustados", x = "Resíduos", y = "Valores Ajustados") +
+                        theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                              axis.line.x = element_line(size = 1, colour = "black"),
+                              axis.line.y = element_line(size = 1, colour = "black"))
+
+residuos_qq_normal_4 <- ggplot(data = data.frame(x = reg_4$residuals), aes(sample = x)) + 
+                        stat_qq(col = "black") + 
+                        stat_qq_line(col = "blue") + 
+                        labs(title = "Curva Normal-QQ", x = "Teórico", y = "Amostra") +
+                        theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                              axis.line.x = element_line(size = 1, colour = "black"),
+                              axis.line.y = element_line(size = 1, colour = "black"))
+
+residuos_hist_4 <- ggplot(data = data.frame(x = reg_4$residuals), aes(x = x)) + 
+                   geom_bar(width = 1, fill = "skyblue", color = "black") + 
+                   scale_x_binned() + 
+                   labs(title = "Histograma - resíduos", x = "Resíduos", y = "Freq. absoluta") + 
+                   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                         axis.line.x = element_line(size = 1, colour = "black"),
+                         axis.line.y = element_line(size = 1, colour = "black"))
+
+g_temp <- plot_grid(residuos_qq_normal_4, residuos_hist_4, align = "hv")
+plot_grid(residuos_ajustados_4, g_temp, nrow = 2, axis = "tblr")
+```
+
+## EXERCÍCIO 1
+
+### a) Gráfico de dispersão dos dados
+
+```{r, include = TRUE, echo = FALSE}
+disp_1
+```
+
+### b) Modelo de regressão linear simples
+
+A equação estimada é $\hat{y}_i = 74,897 - 11,912 \cdot x_i$.
+
+### c) Análise do modelo de regressão 
+
+```{r summary_reg_1, echo = FALSE}
+summary(reg_1, type = "latex")
+```
+
+#### c.1) Resíduos \newline \newline
+
+Os resultados apontam que os resíduos se encontram no intervalo $[-0,72059;0.89706]$, com uma mediana próxima de zero, o que corrobora a hipótese do resíduo ter média zero.
+
+#### c.2) Significância estatística dos coeficientes \newline \newline
+
+Tanto o intercepto quanto a variável explicativa $x$ foram significativas a 1\% de significância, com o resultado da regressão apontando que, tudo o mais constante, há uma redução de 11,912 unidades em $y$ quando $x$ aumenta em 1 unidade.
+
+#### c.3) Percentual da variância explicada pelo modelo \newline \newline
+
+Com um $R^2 = 0,9396$, obtemos que $93,96\%$ das variações em $y$ são explicadas por variações em $x$.
+
+### d) Gráfico de dispersão com reta de regressão
+
+```{r, include = TRUE, echo = FALSE}
+disp_2
+```
+
+\newpage
+
+## EXERCÍCIO 2
+
+### a) Estrura e sumário estatístico dos dados 
+
+A estrutura dos dados é apresentada abaixo:
+
+```{r str_2, echo = FALSE}
+str(dados_2)
+```
+
+À princípio todas as variáveis parecem estar com formato correto. Verificando em seguida o sumário estatístico dos dados:
+
+```{r desc_2, echo = FALSE}
+summary(dados_2, type = "latex")
+```
+
+Nenhuma variável apresentou valores discrepantes.
+
+### b) Classificação das variáveis
+
+1. País - Qualitativa nominal 
+2. Ano - Quantitativa discreta
+3. Pop - Quantitativa discreta 
+4. Continente - Qualitativa nominal
+5. Exp. Vida - Contínua 
+6. pibPercap - Contínua
+
+### c) Tabelas de frequência do número de observações por continente (absoluta e relativa, respectivamente)
+
+```{r freq_abs, echo = FALSE, results='asis'}
+print(xtable(t_absoluta), include.rownames = FALSE, include.header = FALSE, booktabs = TRUE, floating = TRUE, table.placement = "H", type = "latex")
+```
+
+```{r freq_rel, echo = FALSE, results='asis'}
+print(xtable(t_freq), include.rownames = FALSE, include.header = FALSE, booktabs = TRUE, floating = TRUE, table.placement = "H", type = "latex")
+```
+
+### d) Gráfico de barras - frequência absoluta dos continentes
+
+```{r, echo = FALSE}
+barras_2
+```
+
+### e) Gráfico de dispersão: PIB per capita x expectativa de vida
+
+```{r, echo = FALSE}
+disp_3
+```
+
+### f) Gráfico de dispersão: log(PIB per capita) x log(expectativa de vida)
+
+```{r, echo = FALSE}
+disp_4
+```
+
+### g) Modelo de regressão linear: log(expectativa de vida) em função do log(PIB per capita)
+
+Inicialmente, temos a sumarização da regressão realizada:
+
+```{r summary_reg_2, echo = FALSE}
+summary(reg_2, type = "latex")
+```
+
+A análise dos resíduos corrobora a hipótese de que eles têm média zero. Ao analisarmos a significância estatística das variáveis, verificamos que tanto o intercepto quanto o logaritmo do pib per capita são estatisticamente significativos a 1\%. Além disso, a interpretação do modelo é de que um aumento de 1\% no pib per capita está relacionado com um acréscimo de 0,14\% na expectativa de vida. Por fim, $61,30\%$ das variações no variável dependente são explicadas por variações na variável independente.
+
+Procedendo agora a análise dos gráficos de diagnósticos, temos o seguinte:
+
+```{r diag_2, echo = FALSE, fig.height= 5, fig.width=10}
+plot_grid(residuos_ajustados_2, g_temp_2, nrow = 2, axis = "tblr")
+```
+
+Podemos verificar que embora inicialmente o gráfico dos resíduos x valores ajustados pareça apontar que a hipóteses relativas aos resíduos estão sendo satisfeitas, conforme o valor ajustado aumenta, começamos a perceber a presença de *outliers* e uma tendência de redução da magnitude do resíduo, o que pode ser um indicativo de heterocedasticidade. De fato, se realizarmos o teste de Breusch-Pagan para heterocedasticidade, iremos obter que
+
+```{r, echo = FALSE}
+bptest(reg_2)
+```
+ou seja, como o p-valor é muito baixo, rejeitamos a hipótese nula de homocedasticidade.
+
+Analisando agora o gráfico da curva QQ-Normal, podemos observar que inicialmente os resíduos não se ajustam bem à distribuição teórica. Apesar disso, vemos que o ajuste melhor depois, com o histograma confirmando que a ditribuição aparenta ser assimétrica à direita. Dessa forma, não podemos dizer que a hipótese de normalidade dos resíduos foi satisfeita.
+
+## EXERCÍCIO 3
+
+### a) Dicionário e carregamento dos dados 
+
+Analisando o dicionário, disponível no arquivo "dicionario.csv", podemos verificar que algumas variáveis foram importados no formato incorreto. Como não iremos usá-las na análise em questão, podemos seguir em frente.
+
+### b) Exploração da base dados
+
+Abaixo, temos os sumários estatísticos dos dados
+
+```{r sumario_3, echo = FALSE}
+summary(dados_3)
+```
+
+Em seguida, alguns gráficos exploratórios interessantes são
+
+```{r, echo = FALSE, fig.height=5, fig.width=10}
+disp_5
+```
+que mostra que, de forma geral, quanto maior a quantidade de cavalos de potência, maior o preço e
+
+```{r, echo = FALSE, fig.height=5, fig.width=10}
+disp_6
+```
+que mostra como se dá a distribuição dos preços de acordo com a marca do veículo.
+
+### c) Regressão do preço dos carros em função dos cavalos de potência
+
+Intuitivamente, faz sentido que quanto maior a potência do carro, mais caro ele seja, uma vez que os componentes dos veículos mais potentes provavelmente são mais caros que os dos demais. Isso é confirmado ao observamos o resultado da regressão abaixo:
+
+```{r sum_reg_3, echo = FALSE}
+summary(reg_3, type = "latex")
+```
+Os resíduos obtidos são bem grandes, indicando que o ajuste do modelo não é tão bom. Apesar disso, tanto o intercepto quanto a variável de potência são estatisticamente significativos a 1\% de significância. Temos que um aumento de uma unidade na potência eleva o preço do veículo em 173,13 unidades. Por fim, $66,01\%$ das variações no preço são explicadas por variações na potência.
+
+Analisando agora os graficos de diagnóstico, temos:
+
+```{r diag_3, echo = FALSE, fig.height= 5, fig.width=10}
+plot_grid(residuos_ajustados_3, g_temp_3, nrow = 2, axis = "tblr")
+```
+
+O gráfico dos resíduos x valores ajustados não parece bom. Os resíduos não aparentam se distribuir aleatoriamente ao redor do valor 0 e a variância não parece constante. De fato, ao realizarmos o teste de Breusch-Pagan,
+```{r, echo = FALSE}
+bptest(reg_3)
+```
+rejeitamos a hipótese nula de homocedasticidade.
+
+Quanto a distribuição dos resíduos, observando a Curva Normal-QQ e o histograma, podemos perceber que claramente eles não seguem uma distribuição normal. 
+
+#### c.1) Interpretação do ajuste \newline \newline
+
+Veja que o valor do intercepto é $-4630,70$, o que não faz sentido. Como a variável dependente mede preços, ela não pode ser negativa. Para corrigir isso, podemos estimar uma regressão que passa pela origem, assegurando que se a potência é 0, o preço também será. Os resultados dessa estimação são apresentados abaixo:
+
+```{r sum_reg_4, echo = FALSE}
+summary(reg_4, type = "latex")
+```
+
+#### c.2) Análise do modelo \newline \newline
+
+Repare que o valor do $R^2$ obtido com o modelo com intercepto, $66,01\%$, é um valor relativamente alto. Apesar disso, devido ao problema de heterocedasticidade visto no modelo, podemos concluir que a potência do carro não é suficiente para uma boa previsão do preço do carro (claro que isso depende do que se considera como uma "boa previsão"). O modelo provavelmente pode ser melhorado com a inclusão de mais variáveis.

@@ -1,0 +1,197 @@
+---
+title: "Exercício - Econometria"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## **Resolução**
+
+```{r bibliotecas, include = FALSE}
+
+## Bibliotecas necessárias ##
+
+#install.packages(c("robustbase", "GGally", "olsrr", "regclass", 
+#                   "stargazer")) 
+
+library(robustbase)
+library(GGally) # Para fazer uso da função ggpairs
+library(olsrr) # Para fazer uso da função ols_plot_cooksd_bar
+library(regclass) # Para fazer uso da função VIF
+library(stargazer) # Para fazer uso da função stargazer
+
+```
+
+
+Inicialmente vamos carregar os dados e verificar se a importação teve sucesso.
+
+```{r dados, include = TRUE}
+
+wine <- read.table("wine.txt", header = T)
+print(wine)
+
+```
+
+A importação está correta. Em seguida, fatorizamos a variável `regiao`:
+
+```{r dummies, include = TRUE}
+
+wine$regiao <- factor(wine$regiao)
+
+```
+
+Analisando agora o diagrama de dispersão das variáveis contínuas, temos:
+
+```{r pares_corr, include = TRUE}
+
+## Para simplificar a visualização, podemos omitir a parte inferior 
+## (ou superior) da matriz de gráficos de dispersão, pois os gráficos
+## são simétricos.
+
+pairs(wine[, -7], lower.panel = NULL, col = "blue")
+
+```
+
+há uma clara correlação positiva forte entre a qualidade do vinho e suas características, em particular o aroma (do vinho e não do tonel de carvalho), o corpo e o sabor. Por outro lado, a claridade não parece se relacionar com nenhuma das demais variáveis; além disso, aroma e corpo são correlacionados positivamnete com o sabor. 
+
+Para verificar de forma mais robusta a existência de correlação, vamos calcular as correlações lineares de Pearson entre as variáveis contínuas. Para isso podemos utilizar a função `ggpairs` do pacote `GGally`:
+
+```{r pearson, include = TRUE}
+
+ggpairs(wine[, -7], lower = NULL, diag = NULL)
+
+```
+
+Verificamos que todas as correlações significativas são positivas. Em particular, há uma correlação muito elevada entre o `sabor` e a `qualidade` dos vinhos (0.790); entre o `sabor` e o `aroma` (0.737) e entre o `aroma` e a `qualidade` (0.707). As demais variáveis correlacionadas são `corpo` com `aroma`, `qualidade` e `sabor`. Cabe destacar ainda que a significância estatística das correlações discutidas é ao nível de 1$\%.$.
+
+Analisando agora os `boxplots`, temos:
+
+```{r boxplots, include = TRUE}
+
+attach(wine)
+
+par(mfrow = c(3, 2)) # Comando para criar uma matriz de gráficos 
+
+adjbox(claridade, main = "Claridade")
+adjbox(aroma, main = "Aroma")
+adjbox(corpo, main = "Corpo")
+adjbox(sabor, main = "Sabor")
+adjbox(aromac, main = "Aroma (tonel de carvalho)")
+adjbox(qualidade, main = "Qualidade")
+
+par(mfrow = c(1, 1)) # Voltando para o padrão
+
+```
+
+a maioria das variáveis apresenta uma distribuição razoavelmente simétrica e sem valores extremos. As exceções são `claridade` e `aroma`, que não possuem simetria e a variável `sabor`, que tem uma observação com valor muito elevado, o que pode afetar as futuras estimações.
+
+Vamos agora estimar o modelo de regressão múltipla visando explicar a qualidade do vinho em função das outras variáveis.
+
+```{r reg_inicial, include = TRUE}
+
+reg_inicial <- lm(qualidade ~ ., data = wine) # A fórmula `qualidade ~ .`
+                                              # quer dizer "qualidade em
+                                              # função de todas as outras
+                                              # variáveis.
+
+summary(reg_inicial)
+
+
+```
+
+Como podemos ver, há diversas variáveis que não atingiram significância estatística. Antes de realizarmos a interpretação do modelo, é interessante removermos essas variáveis e verificarmos se o ajuste do modelo (medido pelo R$^2$ ajustado) varia significativamente.
+
+```{r reg_final, include = TRUE}
+
+reg_final <- lm(qualidade ~ sabor + regiao, data = wine) 
+
+summary(reg_final)
+
+
+```
+
+de fato há uma melhora no modelo. Além do aumento do R$^2$ ajustado, a estatística F de significância global também se elevou, bem como o nível de significância das variáveis. O valor estimado dos coeficientes não se alterou. Temos, portanto, que a remoção das variáveis `claridade, aroma, corpo, aromac` melhora o modelo, indicando que elas não são adequadas para determinar a qualidade dos vinhos.
+
+Para analisar os resíduos do modelo estimado, inicialmente vamos checar a sua normalidade utilizando um gráfico Q-Q. Temos:
+
+```{r analise_residuos, include = TRUE}
+
+qqnorm(reg_final$residuals, pch = 1, frame = FALSE, cex = 2,
+       xlab = "Quantis teóricos", ylab = "Quantis amostrais",
+       main = "")
+qqline(reg_final$residuals, col = "steelblue", lwd = 2)
+
+```
+
+veja que os resíduos aparentam ser normalmente distribuídos, com exceção de alguns pontos mais extremos. De fato, realizando o teste de Shapiro-Wilk para normalidade, temos:
+
+```{r shapiro_wilk, include = TRUE}
+
+shapiro.test(reg_final$residuals)
+
+```
+
+como o p-valor é bastante alto, não rejeitamos a hipótese nula de normalidade dos resíduos.
+
+A seguir, iremos analisar a presença de heterogeneidade nos resíduos. Para isso podemos criar um gráfico com os resíduos no eixo y e os valores estimados no eixo x, conforme abaixo:
+
+```{r heterocedasticidade, include = TRUE}
+
+plot(reg_final$residuals ~ reg_final$fitted.values, pch = 19,
+     xlab = "Valores estimados", ylab = "Resíduos")
+abline(h = 0, lty = 2)
+
+``` 
+
+uma vez que os pontos se distribuem de maneira simétrica ao redor da linha horizontal $ y = 0 $, não há evidência de heterocedasticidade nos resíduos do modelo. Em seguida, para analisar a hipótese de linearidade do modelo utilizamos um gráfico da variável explicativa contínua `sabor` _versus_ os valores da variável dependente. Temos:
+
+```{r analise_linearidade, include = TRUE}
+
+plot(wine$qualidade ~ wine$sabor, xlab = "Sabor", ylab = "Qualidade")
+
+```
+
+uma vez que os pontos não apresentam uma relação não-linear (um exemplo clássico é o formato de parábola), não há preocupação com uma possível violação da hipótese de linearidade do modelo.
+
+Para analisar a questão da multicolinearidade vamos calcular o fator de inflacionamento de variância (VIF); caso para alguma variável esse valor seja superior a 10, há indícios de multicolinearidade prejudicial:
+
+```{r vif_multicolinearidade, include = TRUE}
+
+VIF(reg_final)
+
+```
+
+os resultados obtidos apontam que não há multicolinearidade prejudical no modelo. Por fim, para analisar a presença de observações muito influentes (*outliers*), iremos calcular as distâncias de Cook para o modelo estimado. Para tanto vamos utilizar a função `ols_plot_cooksd_bar` do pacote `olsrr`:
+
+```{r distancia_cook, include = TRUE}
+
+ols_plot_cooksd_bar(reg_final)
+
+
+```
+
+podemos notar que as observações `12, 20` e `25` são muito influenciais.
+Assim, vamos comparar os modelos com e sem elas para ver se há muitas diferenças:
+
+```{r reg_sem_influentes, include = TRUE}
+
+reg_sem_influentes <- lm(qualidade ~ sabor + regiao,
+                         data = wine[-c(12, 20, 25), ])
+
+summary(reg_sem_influentes)
+
+```
+
+Note que não há variação na significância estatística dos parâmetros após a redução das observações muito influentes. Apesar disso, há um aumento do $R^2$ ajustado do modelo e da estatística F. Além disso, o coeficiente da variável `regiao3` aumentou, enquanto os outros dois, `sabor` e `regiao2`, se reduziram. Dessa forma, a melhor opção é utilizar esse modelo sem os *outliers*.
+
+Em seguida, temos a tabela ANOVA do modelo escolhido:
+
+```{r anova, include = TRUE}
+
+print(anova(reg_sem_influentes))
+
+```
+
+Verificamos, portanto, que apenas as variáveis referentes ao sabor do vinho e a região de sua produção são importantes para explicar a qualidade do produto. Quanto melhor o sabor (maior valor), maior a qualidade do vinho, com um aumento de 1 unidade no sabor resultando em uma variação para cima de 1,07 unidade na qualidade. O mesmo é observado para vinhos produzidos na região 3, apresentando uma qualidade 1,45 unidade maior do que os da região 1 (referência). Por outro lado, os produtos da região 2 têm uma qualidade 1,60 unidade mais baixa do que a região 1.
