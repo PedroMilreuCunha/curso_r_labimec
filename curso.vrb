@@ -1,0 +1,19 @@
+\frametitle{Exemplos}
+\protect\hypertarget{exemplos-1}{}
+\begin{itemize}
+\item
+  Para esses tópicos, em razão da quantidade de assunto a ser discutido
+  e o pouco tempo disponível, optei por disponibilizar 5 exemplos de
+  relatórios (além de um \texttt{dashboard} em \emph{shiny}) que eu fiz
+  utilizando R ao longo dos anos. De posse desse material de referência
+  (e bastante pesquisa \emph{online}), os discentes estarão prontos para
+  criar seus próprios materiais quando necessário.
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Todos se encontram na pasta \texttt{Exemplos} do diretório desse
+    curso, inclusive o material necessário para recriar esses
+    \emph{slides} que estou apresentando.
+  \end{itemize}
+\end{itemize}

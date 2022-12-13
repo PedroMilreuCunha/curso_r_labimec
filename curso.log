@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2022.12.2)  12 DEC 2022 17:52
+This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2022.12.2)  13 DEC 2022 10:18
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -990,13 +990,9 @@ LaTeX Font Info:    Trying to load font information for TS1+lmtt on input line
 (c:/texlive/2022/texmf-dist/tex/latex/lm/ts1lmtt.fd
 File: ts1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
-LaTeX Font Info:    Font shape `T1/lmtt/bx/n' in size <7> not available
+LaTeX Font Info:    Font shape `T1/lmtt/bx/n' in size <5> not available
 (Font)              Font shape `T1/lmtt/b/n' tried instead on input line 27.
-)
-Overfull \vbox (11.94667pt too high) detected at line 284
- []
-
-[5
+) [5
 
 ] [6
 
@@ -1148,10 +1144,7 @@ Package pdftex.def Info: figures/mapa_sub_estupros.pdf  used on input line 712.
 ]
 \openout4 = `curso.vrb'.
 
-(./curso.vrb
-LaTeX Font Info:    Font shape `T1/lmtt/bx/n' in size <5> not available
-(Font)              Font shape `T1/lmtt/b/n' tried instead on input line 18.
-) [22
+(./curso.vrb) [22
 
 ]
 \openout4 = `curso.vrb'.
@@ -1187,9 +1180,9 @@ Package hyperref Warning: Ignoring empty anchor on input line 22.
 
 )
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <10.95> on input line 1026.
+(Font)              <10.95> on input line 1027.
 LaTeX Font Info:    Font shape `T1/lmss/m/it' in size <10.95> not available
-(Font)              Font shape `T1/lmss/m/sl' tried instead on input line 1026.
+(Font)              Font shape `T1/lmss/m/sl' tried instead on input line 1027.
 
 [28
 
@@ -1209,10 +1202,10 @@ Package hyperref Warning: Ignoring empty anchor on input line 21.
 
 ]
 
-Package hyperref Warning: Ignoring empty anchor on input line 1174.
+Package hyperref Warning: Ignoring empty anchor on input line 1177.
 
 
-Overfull \hbox (8.4652pt too wide) in paragraph at lines 1174--1174
+Overfull \hbox (8.4652pt too wide) in paragraph at lines 1177--1177
  [] 
  []
 
@@ -1264,13 +1257,13 @@ LaTeX Font Info:    Font shape `T1/lmss/m/it' in size <7> not available
 \openout4 = `curso.vrb'.
 
 (./curso.vrb
-<curso_files/figure-beamer/unnamed-chunk-6-1.pdf, id=348, 279.0425pt x 98.3675p
-t>
+<curso_files/figure-beamer/unnamed-chunk-6-1.pdf, id=348, 712.6625pt x 495.8525
+pt>
 File: curso_files/figure-beamer/unnamed-chunk-6-1.pdf Graphic file (type pdf)
 <use curso_files/figure-beamer/unnamed-chunk-6-1.pdf>
 Package pdftex.def Info: curso_files/figure-beamer/unnamed-chunk-6-1.pdf  used 
 on input line 15.
-(pdftex.def)             Requested size: 279.04181pt x 98.36723pt.
+(pdftex.def)             Requested size: 215.09444pt x 182.58488pt.
 ) [40
 
  <./curso_files/figure-beamer/unnamed-chunk-6-1.pdf>] [41
@@ -1291,7 +1284,7 @@ df)
 <use curso_files/figure-beamer/temas_basicos_ggplot-1.pdf>
 Package pdftex.def Info: curso_files/figure-beamer/temas_basicos_ggplot-1.pdf  
 used on input line 11.
-(pdftex.def)             Requested size: 184.37556pt x 156.50766pt.
+(pdftex.def)             Requested size: 261.20323pt x 208.67435pt.
 ) [43
 
  <./curso_files/figure-beamer/temas_basicos_ggplot-1.pdf>]
@@ -1305,7 +1298,7 @@ used on input line 11.
 File: curso_files/figure-beamer/tema_customizado-1.pdf Graphic file (type pdf)
 <use curso_files/figure-beamer/tema_customizado-1.pdf>
 Package pdftex.def Info: curso_files/figure-beamer/tema_customizado-1.pdf  used
- on input line 1512.
+ on input line 1515.
 (pdftex.def)             Requested size: 300.90205pt x 208.67229pt.
 [45
 
@@ -1332,7 +1325,7 @@ Package pdftex.def Info: curso_files/figure-beamer/tema_customizado-1.pdf  used
 <figures/adeus_wally.png, id=449, 401.5pt x 401.5pt>
 File: figures/adeus_wally.png Graphic file (type png)
 <use figures/adeus_wally.png>
-Package pdftex.def Info: figures/adeus_wally.png  used on input line 1633.
+Package pdftex.def Info: figures/adeus_wally.png  used on input line 1636.
 (pdftex.def)             Requested size: 113.80992pt x 113.80992pt.
 [51
 
@@ -1352,11 +1345,11 @@ LaTeX Warning: There were multiply-defined labels.
 
  ) 
 Here is how much of TeX's memory you used:
- 27269 strings out of 476082
- 521241 string characters out of 5800512
+ 27262 strings out of 476082
+ 521117 string characters out of 5800512
  896765 words of memory out of 5000000
- 47648 multiletter control sequences out of 15000+600000
- 550523 words of font info for 151 fonts, out of 8000000 for 9000
+ 47641 multiletter control sequences out of 15000+600000
+ 549580 words of font info for 148 fonts, out of 8000000 for 9000
  430 hyphenation exceptions out of 8191
  99i,15n,104p,1002b,546s stack positions out of 10000i,1000n,20000p,200000b,200000s
 {c:/texlive/2022/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc}{c:/texlive/2022/te
@@ -1372,7 +1365,7 @@ m/lmtk10.pfb><c:/texlive/2022/texmf-dist/fonts/type1/public/lm/lmtt8.pfb><c:/te
 xlive/2022/texmf-dist/fonts/type1/public/lm/lmtti10.pfb><c:/texlive/2022/texmf-
 dist/fonts/type1/public/amsfonts/symbols/msam10.pfb><c:/texlive/2022/texmf-dist
 /fonts/type1/public/amsfonts/symbols/msam7.pfb>
-Output written on curso.pdf (51 pages, 4184608 bytes).
+Output written on curso.pdf (51 pages, 4560352 bytes).
 PDF statistics:
  579 PDF objects out of 1000 (max. 8388607)
  465 compressed objects within 5 object streams

@@ -75,7 +75,7 @@ show_fig <- function(f) # Fonte: https://stackoverflow.com/a/56044642
 
 # Configurações necessárias para essa aula
 
-\small
+\scriptsize
 
 ```{r, eval = FALSE}
 # Bibliotecas ---- 
@@ -159,6 +159,7 @@ dados referentes aos fenômenos cuja distribuição espacial queremos analisar, 
 1.  O primeiro passo é importar a geometria base do mapa. Para tanto, utilizamos o arquivo `BR_UF_2021.shp` e a função `st_read()` da biblioteca `sf`. Além disso, também criamos uma coluna com as siglas das UFs brasileiras no arquivo importado.
 
 \vspace{0.15cm}
+
 ```{r passos_iniciais_mapa_1, results = "hide"}
 dados_geo <- st_read("data/shapefiles/BR_UF_2021.shp")
 dados_geo$Sigla_UF <- c("RO", "AC", "AM", "RR",
@@ -176,6 +177,7 @@ dados_geo$Sigla_UF <- c("RO", "AC", "AM", "RR",
 2.  Em seguida, lemos o arquivo com os dados cuja distribuição espacial queremos analisar e realizamos as transformações necessárias (nesse caso adicionar as siglas dos estados ausentes, dando o valor `NaN` para as observações em questão). Nesse exemplo vamos utilizar os dados referentes à subnotificação de estupros disponíveis no arquivo `data/sub_estimadas_estupros.xlsx`.
 
 \vspace{0.15cm}
+
 ```{r passos_iniciais_mapa_2}
 dados_sub <- read_excel("data/sub_estimadas_estupros.xlsx") %>%
   select(Sigla_UF, sub_lag_end) %>%
@@ -234,7 +236,7 @@ mapa_inicial
 
 Visando melhorar o mapa inicial que geramos anteriormente, iremos:
 
-1. Afinar as bordas entre os polígonos:
+1.  Afinar as bordas entre os polígonos:
 
 \vspace{0.15cm}
 
@@ -243,9 +245,10 @@ Visando melhorar o mapa inicial que geramos anteriormente, iremos:
 ```{r passo_1, eval = FALSE}
 tm_borders(lwd = 0.55)
 ```
-\normalsize 
 
-2. Remover o título da legenda e definir seus valores, mudar a paleta de cores e associar uma cor e rótulo específicos para os valores ausentes:
+\normalsize
+
+2.  Remover o título da legenda e definir seus valores, mudar a paleta de cores e associar uma cor e rótulo específicos para os valores ausentes:
 
 \vspace{0.15cm}
 
@@ -259,26 +262,28 @@ tm_fill("sub_lag_end", title = "", textNA = "Dado ausente",
                    "40% - 50%", "50% - 60%",
                    "60% - 70%"))
 ```
+
 \normalsize
 
 ### Customizando um mapa com o pacote `tmap`
 
-3. Identificar cada UF no mapa com a sua respectiva sigla:
-   
+3.  Identificar cada UF no mapa com a sua respectiva sigla:
+
 \vspace{0.15cm}
- 
+
 \scriptsize
 
 ```{r passo_3, eval = FALSE}
 tm_text("Sigla_UF", size = 0.65, fontfamily = "serif",
         fontface = "bold", col = "black")
 ```
+
 \normalsize
 
 4.  Adicionar uma nota e a fonte dos dados ao mapa:
 
 \vspace{0.15cm}
-    
+
 \scriptsize
 
 ```{r passo_4, eval = FALSE}
@@ -286,12 +291,13 @@ tm_credits("Nota: Média do período jan/2012 - dez/2020.",
            fontface = "italic", size = 0.7,
            align = "right")
 ```
-\normalsize 
+
+\normalsize
 
 5.  Adicionar um título principal ao gráfico, remover o "quadro" envolta do mapa e formatar a fonte da legenda e título:
 
 \vspace{0.15cm}
-    
+
 \scriptsize
 
 ```{r passo_5, eval = FALSE}
@@ -304,7 +310,8 @@ subnotificação", "de estupros de mulheres no Brasil",
           legend.title.size = 1.5, legend.text.size = 0.8,
           legend.outside.position = c("left", "bottom"))
 ```
-\normalsize 
+
+\normalsize
 
 ### Customizando um mapa com o pacote `tmap`
 
@@ -325,18 +332,18 @@ mapa <- tm_shape(dados) +
                                "20% - 30%", "30% - 40%",
                                "40% - 50%", "50% - 60%",
                                "60% - 70%")) + 
-            tm_text("Sigla_UF", size = 0.65, fontfamily = "serif",
+            tm_text("Sigla_UF", size = 0.65, fontfamily = "Garamond",
                     fontface = "bold", col = "black") +
             tm_credits("Nota: Média do período jan/2012 - dez/2020.",
                        fontface = "italic", size = 0.7,
-                       align = "right") +
+                       fontfamily = "Garamond", align = "right") +
             tm_credits("Fonte: Elaboração própria a partir dos dados das SSPs.",
-                       size = 0.8, align = "right") + 
+                       size = 0.8, align = "right", fontfamily = "Garamond") + 
             tm_layout(main.title = paste("Distribuição espacial da subnotificação",
                                          "de estupros de mulheres no Brasil",
                                          sep = "\n"),
                       title.size = 1,
-                      main.title.position = "center", fontfamily = "serif",
+                      main.title.position = "center", fontfamily = "Garamond",
                       main.title.fontface = "italic", scale = 1, frame = FALSE,
                       legend.title.size = 1.5, legend.text.size = 0.8,
                       legend.outside.position = c("left", "bottom"))
@@ -358,19 +365,20 @@ show_fig("figures/mapa_sub_estupros.svg")
 
 ### Introdução
 
-+ O `stargazer` é um famoso pacote da linguagem R que é utilizado para gerar tabelas bem formatadas contendo resultados de regressões, `data.frame`s ou estatísticas descritivas; 
+-   O `stargazer` é um famoso pacote da linguagem R que é utilizado para gerar tabelas bem formatadas contendo resultados de regressões, `data.frame`s ou estatísticas descritivas;
 
-+ Funciona com regressões estimadas por diversos pacotes, como, por exemplo, modelos lineares (`?lm`), modelos lineares generalizados (`?glm`) e modelos para dados em painel (`?plm`);
+-   Funciona com regressões estimadas por diversos pacotes, como, por exemplo, modelos lineares (`?lm`), modelos lineares generalizados (`?glm`) e modelos para dados em painel (`?plm`);
 
-+ A biblioteca gera tabelas em três formatos: `ASCII` (.txt), `HTML` (.html) e \LaTeX (.pdf); iremos focar apenas em `ASCII` e \LaTeX \hspace{0.01cm} nesse curso.
+-   A biblioteca gera tabelas em três formatos: `ASCII` (.txt), `HTML` (.html) e \LaTeX (.pdf); iremos focar apenas em `ASCII` e \LaTeX \hspace{0.01cm} nesse curso.
 
 ### Utilização
 
-+ Toda a funcionalidade do pacote se dá através da função `stargazer`, cujo funcionamento pode ser consultado em `?stargazer::stargazer`. Tem-se abaixo os parâmetros que a função aceita, bem como os valores padrões de cada um.
+-   Toda a funcionalidade do pacote se dá através da função `stargazer`, cujo funcionamento pode ser consultado em `?stargazer::stargazer`. Tem-se abaixo os parâmetros que a função aceita, bem como os valores padrões de cada um.
 
 \vspace{0.15cm}
 
 \scriptsize
+
 ```{r, eval = FALSE}
 function (..., type = "latex", title = "", style = "default", 
     summary = NULL, out = NULL, out.header = FALSE, column.labels = NULL, 
@@ -397,20 +405,22 @@ function (..., type = "latex", title = "", style = "default",
     summary.logical = TRUE, summary.stat = NULL, nobs = TRUE, 
     mean.sd = TRUE, min.max = TRUE, median = FALSE, iqr = FALSE) 
 ```
+
 \normalsize
+
 ### Exemplos
 
-+ Vamos analisar dois usos mais comuns do pacote `stargazer`: 
+-   Vamos analisar dois usos mais comuns do pacote `stargazer`:
 
-    1. Visualização dos resultados de análises descritivas; 
-    
-    2. Visualização dos resultados de estimações de modelos econométricos:
-    
+    1.  Visualização dos resultados de análises descritivas;
+
+    2.  Visualização dos resultados de estimações de modelos econométricos:
+
         2.1 Caso mais simples com apenas um modelo e sem customização da tabela;
-        
+
         2.2 Caso mais complexo com vários modelos e customização da tabela;
-        
-+ Para isso iremos importar o conjunto de dados `data/analise_enade.Rdata` que contém informações sobre o rendimento de discentes universitários no ENADE:
+
+-   Para isso iremos importar o arquivo `data/analise_enade.Rdata` que contém informações sobre o rendimento de discentes universitários no ENADE e estimativas econométricas:
 
 \vspace{0.15cm}
 
@@ -420,35 +430,40 @@ load("data/analise_enade.Rdata")
 
 ### Exemplos em `ASCII` (.txt)
 
-+ Vamos agora criar uma tabela em `ASCII`\footnote{Esse formato é útil para sessões interativas no R ou estágios iniciais de estimações, momentos nos quais queremos uma visualização rápida e bem formatada das informações presentes nos dados.} contendo as estatísticas descritivas do `data.frame` _dados_enade_ que importamos anteriormente. O código necessário para isso, bem como o resultado obtido podem ser vistos a seguir:
+-   Vamos agora criar uma tabela em `ASCII`\footnote{Esse formato é útil para sessões interativas no R ou estágios iniciais de estimações, momentos nos quais queremos uma visualização rápida e bem formatada das informações presentes nos dados.} contendo as estatísticas descritivas do `data.frame` *dados_enade* que importamos anteriormente. O código necessário para isso, bem como o resultado obtido podem ser vistos a seguir:
 
 \vspace{0.15cm}
 
-\scriptsize 
+\scriptsize
+
 ```{r desc_ascii}
 stargazer(dados_enade, type = "text")
 ```
-\normalsize 
+
+\normalsize
 
 ### Exemplos em `ASCII` (.txt)
 
-+ Agora um exemplo clássico de formatação de tabelas simples de regressão:
+-   Agora um exemplo clássico de formatação de tabelas simples de regressão:
 
 \vspace{0.15cm}
 
-\tiny 
+\tiny
+
 ```{r ex_simples_ascii, echo = TRUE}
 stargazer(didreg, type = "text", single.row = TRUE)
 ```
-\normalsize 
+
+\normalsize
 
 ### Exemplos em `ASCII` (.txt)
 
-+ Por fim, temos agora o exemplo mais complexo. Utilizaremos o seguinte código:
+-   Por fim, temos agora o exemplo mais complexo. Utilizaremos o seguinte código:
 
 \vspace{0.15cm}
 
-\tiny 
+\tiny
+
 ```{r ex_complexo_ascii_cod, eval = FALSE}
 stargazer(didreg_fe, didreg_fe_logit, didreg_fe_entropia,
           type = "text", single.row = TRUE,
@@ -466,13 +481,15 @@ stargazer(didreg_fe, didreg_fe_logit, didreg_fe_entropia,
           dep.var.labels = "ln(Nota média)", dep.var.caption = "Variável dependente",
           multicolumn = TRUE, model.names = FALSE, header = FALSE)
 ```
-\normalsize 
+
+\normalsize
 
 O resultado pode ser visto no próximo slide.
 
 ### Exemplo em `ASCII` (.txt)
 
-\scriptsize 
+\scriptsize
+
 ```{r ex_complexo_ascii, echo = FALSE}
 stargazer(didreg_fe, didreg_fe_logit, didreg_fe_entropia,
           type = "text", single.row = TRUE,
@@ -490,40 +507,45 @@ stargazer(didreg_fe, didreg_fe_logit, didreg_fe_entropia,
           dep.var.labels = "ln(Nota média)", dep.var.caption = "Variável dependente",
           multicolumn = TRUE, model.names = FALSE)
 ```
-\normalsize 
+
+\normalsize
 
 ### Exemplos em \LaTeX (.pdf)
 
-+ Vamos agora recriar o exemplo das estatísticas descritivas, porém utilizando o formato \LaTeX.
+-   Vamos agora recriar o exemplo das estatísticas descritivas, porém utilizando o formato \LaTeX.
 
 \vspace{0.15cm}
 
 \scriptsize
+
 ```{r desc_latex, results = "asis"}
 stargazer(dados_enade, type = "latex", header = FALSE)
 ```
-\normalsize 
 
+\normalsize
 
 ### Exemplos em \LaTeX (.pdf)
 
-+ Em seguida, reproduzimos o exemplo de uma regressão simples:
+-   Em seguida, reproduzimos o exemplo de uma regressão simples:
 
 \vspace{0.15cm}
 
-\tiny 
+\tiny
+
 ```{r ex_simples_latex, results = "asis"}
 stargazer(didreg, type = "latex", header = FALSE, single.row = TRUE)
 ```
-\normalsize 
+
+\normalsize
 
 ### Exemplos em \LaTeX (.pdf)
 
-+ Por fim, com o código abaixo geramos uma tabela complexa, com diversos modelos e bem formatada. 
+-   Por fim, com o código abaixo geramos uma tabela complexa, com diversos modelos e bem formatada.
 
 \vspace{0.15cm}
 
-\tiny 
+\tiny
+
 ```{r ex_complexo_latex_cod, eval = FALSE}
 stargazer(didreg_fe, didreg_fe_logit, didreg_fe_entropia,
           type = "latex",
@@ -542,13 +564,15 @@ stargazer(didreg_fe, didreg_fe_logit, didreg_fe_entropia,
           multicolumn = TRUE, model.names = FALSE, align = TRUE, header = FALSE,
           table.placement = "H", no.space = TRUE)
 ```
-\normalsize 
 
-+ É importante destacar que alguns itens específicos não podem ser customizados diretamente através do `stargazer`, como, por exemplo, os rótulos _Observations_ e _Adjusted R2_, que não conseguimos traduzir para o português. Apesar disso, uma vez que a função `stargazer::stargazer()` retorna o código em LaTeX necessário para criar a(s) tabela(s) escolhida(s) não é difícil customizar o resultado final.
+\normalsize
+
+-   É importante destacar que alguns itens específicos não podem ser customizados diretamente através do `stargazer`, como, por exemplo, os rótulos *Observations* e *Adjusted R2*, que não conseguimos traduzir para o português. Apesar disso, uma vez que a função `stargazer::stargazer()` retorna o código em LaTeX necessário para criar a(s) tabela(s) escolhida(s) não é difícil customizar o resultado final.
 
 ### Exemplos em \LaTeX (.pdf)
 
-\tiny 
+\tiny
+
 ```{r ex_complexo_latex, results = "asis", echo = FALSE}
 stargazer(didreg_fe, didreg_fe_logit, didreg_fe_entropia,
           type = "latex",
@@ -567,42 +591,42 @@ stargazer(didreg_fe, didreg_fe_logit, didreg_fe_entropia,
           multicolumn = TRUE, model.names = FALSE, align = TRUE, header = FALSE,
           table.placement = "H", no.space = TRUE)
 ```
-\normalsize 
+
+\normalsize
 
 ### Funcionalidades avançadas
 
-+ Dentre as funcionalidades mais avançadas do `stargazer` não utilizadas aqui, destacam-se:
+-   Dentre as funcionalidades mais avançadas do `stargazer` não utilizadas aqui, destacam-se:
 
-    1. Utilização de coeficientes, erros-padrões, estatísticas-t e p-valores customizados com os parâmetros `coef, se, t, p`, respectivamente;
-    
-    2. Substituição dos erros-padrões por intervalos de confiança (parâmetros `ci, ci.custom, ci.level, ci.separator`);
-    
-    3. Aplicação de funções nos coeficientes, erros-padrões, estatísticas-t, intervalos de confiança e p-valores (parâmetros `apply.coef, apply.se, apply.t, apply.ci, apply.p`);
-    
-    4. Exportar o resultado do comando diretamente para um arquivo `.txt` com o parâmetro `out`.
-    
+    1.  Utilização de coeficientes, erros-padrões, estatísticas-t e p-valores customizados com os parâmetros `coef, se, t, p`, respectivamente;
+
+    2.  Substituição dos erros-padrões por intervalos de confiança (parâmetros `ci, ci.custom, ci.level, ci.separator`);
+
+    3.  Aplicação de funções nos coeficientes, erros-padrões, estatísticas-t, intervalos de confiança e p-valores (parâmetros `apply.coef, apply.se, apply.t, apply.ci, apply.p`);
+
+    4.  Exportar o resultado do comando diretamente para um arquivo `.txt` com o parâmetro `out`.
 
 ### Alternativas ao `stargazer`
 
-+ Embora ainda seja uma das **referências** no ecossistema do R no que diz respeito a exportação de resultados em tabelas formatadas, especialmente utilizando \LaTeX, o `stargazer` tem problemas e não é compatível com todos os tipos de modelos que podem ser gerados com os diversos pacotes existentes na linguagem;
+-   Embora ainda seja uma das **referências** no ecossistema do R no que diz respeito a exportação de resultados em tabelas formatadas, especialmente utilizando \LaTeX, o `stargazer` tem problemas e não é compatível com todos os tipos de modelos que podem ser gerados com os diversos pacotes existentes na linguagem;
 
-+ Boas alternativas existem e é importante procurar qual melhor se adequa em cada ocasião. Algumas opções são:
+-   Boas alternativas existem e é importante procurar qual melhor se adequa em cada ocasião. Algumas opções são:
 
-    1. [\textcolor{blue}{gtsummary}](https://www.danieldsjoberg.com/gtsummary/);
-    
-    2. [\textcolor{blue}{flextable}](https://ardata-fr.github.io/flextable-book/);
-    
-    3. [\textcolor{blue}{etable}](https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=&cad=rja&uact=8&ved=2ahUKEwj-uNb1udz7AhUHuZUCHRw2Am0QFnoECAoQAQ&url=https%3A%2F%2Frdrr.io%2Fcran%2Ffixest%2Fman%2Fetable.html&usg=AOvVaw0Pr3vhB__WaLGrz_n8InK6) para modelos de efeitos fixos estimados com o pacote `fixest`;
-    
-    4. [\textcolor{blue}{xtable}](https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=&ved=2ahUKEwi5x8SRutz7AhXQq5UCHcGEAh8QFnoECA0QAQ&url=https%3A%2F%2Fcran.r-project.org%2Fweb%2Fpackages%2Fxtable%2Fvignettes%2FxtableGallery.pdf&usg=AOvVaw1K8Ssoq5kRZwXjiJMGkrhK).
+    1.  [\textcolor{blue}{gtsummary}](https://www.danieldsjoberg.com/gtsummary/);
+
+    2.  [\textcolor{blue}{flextable}](https://ardata-fr.github.io/flextable-book/);
+
+    3.  [\textcolor{blue}{etable}](https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=&cad=rja&uact=8&ved=2ahUKEwj-uNb1udz7AhUHuZUCHRw2Am0QFnoECAoQAQ&url=https%3A%2F%2Frdrr.io%2Fcran%2Ffixest%2Fman%2Fetable.html&usg=AOvVaw0Pr3vhB__WaLGrz_n8InK6) para modelos de efeitos fixos estimados com o pacote `fixest`;
+
+    4.  [\textcolor{blue}{xtable}](https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=&ved=2ahUKEwi5x8SRutz7AhXQq5UCHcGEAh8QFnoECA0QAQ&url=https%3A%2F%2Fcran.r-project.org%2Fweb%2Fpackages%2Fxtable%2Fvignettes%2FxtableGallery.pdf&usg=AOvVaw1K8Ssoq5kRZwXjiJMGkrhK).
 
 # Funções
 
 ### O que são funções na linguagem R?
 
-+ As funções na linguagem R seguem o mesmo princípio de funções matemáticas, ou seja, recebem uma entrada, realizam alguma operação com ela e retornam algo. 
+-   As funções na linguagem R seguem o mesmo princípio de funções matemáticas, ou seja, recebem uma entrada, realizam alguma operação com ela e retornam algo.
 
-    + Uma diferença importante é que as funções na linguagem R não precisam, **necessáriamente**, retornar alguma coisa ou mesmo receber uma entrada. Por exemplo:
+    -   Uma diferença importante é que as funções na linguagem R não precisam, **necessáriamente**, retornar alguma coisa ou mesmo receber uma entrada. Por exemplo:
 
 \vspace{0.15cm}
 
@@ -620,17 +644,18 @@ saudar()
 
 ### Como criar funções e quando utilizá-las?
 
-+ Criamos as funções como quaisquer outros objetos da linguagem, ou seja, a associando a algum nome com o operador `<-`. Para tanto tem-se o comando `function(argumentos)` onde `argumentos` são os parâmetros passados à função (vazio caso a função não receba parâmetros).
+-   Criamos as funções como quaisquer outros objetos da linguagem, ou seja, a associando a algum nome com o operador `<-`. Para tanto tem-se o comando `function(argumentos)` onde `argumentos` são os parâmetros passados à função (vazio caso a função não receba parâmetros).
 
-+ É interessante utilizar as funções quando temos algum cálculo ou processamento que queremos replicar diversas vezes ou quando queremos separar as partes do código em pequenas unidades que realizam cada uma um conjunto de tarefas, contribuindo para uma lógica de programação mais fluida e mais simples de se entender.
+-   É interessante utilizar as funções quando temos algum cálculo ou processamento que queremos replicar diversas vezes ou quando queremos separar as partes do código em pequenas unidades que realizam cada uma um conjunto de tarefas, contribuindo para uma lógica de programação mais fluida e mais simples de se entender.
 
 ### Exemplo básico - criação da função
 
-+ Função para calcular o custo do consumo energético de um local
+-   Função para calcular o custo do consumo energético de um local
 
 \vspace{0.15cm}
 
 \tiny
+
 ```{r ex_funcao_basica}
 
 custo_energia <- function(tipo_local, consumo_kwh, atraso = 0, desconto = 0) {
@@ -658,11 +683,12 @@ custo_energia <- function(tipo_local, consumo_kwh, atraso = 0, desconto = 0) {
   
 }
 ```
-\normalsize 
+
+\normalsize
 
 ### Exemplo básico - resultados
 
-+ Os resultados podem ser vistos a seguir.
+-   Os resultados podem ser vistos a seguir.
 
 \vspace{0.15cm}
 
@@ -678,11 +704,12 @@ custo_energia(tipo_local = "Comercial", consumo_kwh = 800, atraso = 3)
 
 ### Exemplo aplicado - criação da função
 
-+ Aproximar e visualizar graficamente a solução de equações/inequações numéricas. Exemplo baseado no [\textcolor{blue}{problema do aniversário}](https://www.scientificamerican.com/article/bring-science-home-probability-birthday-paradox/).
+-   Aproximar e visualizar graficamente a solução de equações/inequações numéricas. Exemplo baseado no [\textcolor{blue}{problema do aniversário}](https://www.scientificamerican.com/article/bring-science-home-probability-birthday-paradox/).
 
 \vspace{0.15cm}
 
-\tiny 
+\tiny
+
 ```{r ex_funcao_aplicado}
 simulacao_aniversario <- function(n_pessoas) {
 # ENTRADA:
@@ -719,11 +746,11 @@ resultados <- simulacao_aniversario(seq(12, 36, 1))
 
 ### Exemplo aplicado - resultados
 
-+ Os resultados podem ser vistos a seguir.
+-   Os resultados podem ser vistos a seguir.
 
 \vspace{0.15cm}
 
-```{r, echo = FALSE, fig.align = "center", fig.height = 1.5, fig.width = 4}
+```{r, echo = FALSE, fig.align = "center", out.height = "70%", out.width = "70%"}
 resultados[2]
 ```
 
@@ -731,15 +758,15 @@ resultados[2]
 
 ### O que é um tema gráfico?
 
-+ Um tema gráfico nada mais é que uma função que é utilizada para configurar as características de um gráfico. Focaremos especificamente na criação e utilização de temas gráficos para **a biblioteca `ggplot2` nesse curso**.
+-   Um tema gráfico nada mais é que uma função que é utilizada para configurar as características de um gráfico. Focaremos especificamente na criação e utilização de temas gráficos para **a biblioteca `ggplot2` nesse curso**.
 
-+ A partir dele podemos definir características padrões para a formatação e posicionamento dos textos, disposição da legenda, existência de "quadriculado" no gráfico, dentre outras diversas coisas. 
+-   A partir dele podemos definir características padrões para a formatação e posicionamento dos textos, disposição da legenda, existência de "quadriculado" no gráfico, dentre outras diversas coisas.
 
 ### Temas básicos disponíveis no `ggplot2`
 
-+ A biblioteca `ggplot2` vem com *8 temas gráficos* de fábrica. Seus nomes, bem como suas características podem ser vistas a seguir:
+-   A biblioteca `ggplot2` vem com *8 temas gráficos* de fábrica. Seus nomes, bem como suas características podem ser vistas a seguir:
 
-```{r temas_basicos_ggplot, echo = FALSE, out.height = "60%", out.width = "60%"}
+```{r temas_basicos_ggplot, echo = FALSE, out.height = "80%", out.width = "85%"}
 
 df <- data.frame(x = 1:20, y = 1:20)
 base <- ggplot(df, aes(x, y)) + geom_point()
@@ -758,7 +785,7 @@ ggarrange(b1, b2, b3, b4, b5, b6, b7, b8,
 
 ### Criação de temas customizados
 
-+ Para gerar temas gráficos, criamos funções com os parâmetros gráficos de interesse dentro delas. Um exemplo extremamente simples mas que já deixa a visualização mais bacana é:
+-   Para gerar temas gráficos, criamos funções com os parâmetros gráficos de interesse dentro delas. Um exemplo extremamente simples mas que já deixa a visualização mais bacana é:
 
 \vspace{0.15cm}
 
@@ -804,13 +831,14 @@ novo_tema()
 g
 ```
 
-### Parâmetros importantes 
+### Parâmetros importantes
 
-+ A seguir, utilizando o comando `?ggplot2::theme`, listo os parâmetros que você pode customizar para deixar o gráfico como quiser. Não deixe de consultar também a vinheta sobre os parâmetros do `ggplot2` com `vignette("ggplot2-specs")`.
+-   A seguir, utilizando o comando `?ggplot2::theme`, listo os parâmetros que você pode customizar para deixar o gráfico como quiser. Não deixe de consultar também a vinheta sobre os parâmetros do `ggplot2` com `vignette("ggplot2-specs")`.
 
 \vspace{0.15cm}
 
-\tiny 
+\tiny
+
 ```{r param_ggplot, eval = FALSE}
 theme(line, rect, text, title, aspect.ratio, axis.title,
   axis.title.x, axis.title.x.top,
@@ -842,11 +870,12 @@ theme(line, rect, text, title, aspect.ratio, axis.title,
   ...,
   complete = FALSE, validate = TRUE)
 ```
-\normalsize 
+
+\normalsize
 
 ### Funcionalidade avançada
 
-+ Após criar seu tema personalizado, é interessante colocá-lo em um _script_ separado e, fazendo uso do comando `source`, importá-lo no início de cada programa. *Eu* costumo ter um _script_ chamado `tema_customizado.R` no diretório de trabalho. Assim, simplesmente adiciono
+-   Após criar seu tema personalizado, é interessante colocá-lo em um *script* separado e, fazendo uso do comando `source`, importá-lo no início de cada programa. *Eu* costumo ter um *script* chamado `tema_customizado.R` no diretório de trabalho. Assim, simplesmente adiciono
 
 \vspace{0.15cm}
 
@@ -858,15 +887,15 @@ source("tema_customizado.R")
 
 ```
 
-no início de cada _script_ e garanto gráficos de alta qualidade e consistência em meus trabalhos.
+no início de cada *script* e garanto gráficos de alta qualidade e consistência em meus trabalhos.
 
-# RMarkdown (relatórios e slides) e dashboards (_shiny_) 
+# RMarkdown (relatórios e slides) e dashboards (*shiny*)
 
-### Exemplos 
+### Exemplos
 
-+ Para esses tópicos, em razão da quantidade de assunto a ser discutido e o pouco tempo disponível, optei por disponibilizar 5 exemplos de relatórios (além de um `dashboard` em _shiny_) que eu fiz utilizando R ao longo dos anos. De posse desse material de referência (e bastante pesquisa _online_), os discentes estarão prontos para criar seus próprios materiais quando necessário.
+-   Para esses tópicos, em razão da quantidade de assunto a ser discutido e o pouco tempo disponível, optei por disponibilizar 5 exemplos de relatórios (além de um `dashboard` em *shiny*) que eu fiz utilizando R ao longo dos anos. De posse desse material de referência (e bastante pesquisa *online*), os discentes estarão prontos para criar seus próprios materiais quando necessário.
 
-    + Todos se encontram na pasta `Exemplos` do diretório desse curso, inclusive o material necessário para recriar esses _slides_ que estou apresentando.
+    -   Todos se encontram na pasta `Exemplos` do diretório desse curso, inclusive o material necessário para recriar esses *slides* que estou apresentando.
 
 # Dúvidas?
 
@@ -874,9 +903,10 @@ no início de cada _script_ e garanto gráficos de alta qualidade e consistênci
 
 **Muito obrigado pela atenção e presença. Boa noite!**
 
-\centering 
+\centering
+
 \includegraphics[width = 4cm, height = 4cm]{figures/adeus_wally.png}
 
-\vfill 
+\vfill
 
 *Um evento organizado pelo **Laboratório de Inteligência Artificial e Macroeconomia Computacional** ([LABIMEC](https://www.ufpb.br/labimec)) da UFPB.*
